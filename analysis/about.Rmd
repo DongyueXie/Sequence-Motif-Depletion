@@ -1,0 +1,8 @@
+---
+title: "About"
+output:
+  html_document:
+    toc: false
+---
+
+Transcription factor binding site is characterized by the DNA sequence motifs. A powerful tool to visualize the motif is logo plot. Usually, the enrichment is highlighted while the depletion is usually overlooked. Here, we introduce negative logo plot, where the depletion is plotted down below the zero on y axis so that we can find both strong postive and negative effects.

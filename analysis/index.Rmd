@@ -1,0 +1,10 @@
+---
+title: "Home"
+output:
+  html_document:
+    toc: false
+---
+
+This project aims to study the depletion of bases in DNA sequence.
+
+Click on this [link](Consensus.html) to see the improvement of IUPAC code.
