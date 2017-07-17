@@ -271,15 +271,12 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Depletion</a>
+      <a class="navbar-brand" href="index.html">Logoplot dash</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
-</li>
-<li>
-  <a href="about.html">About</a>
+  <a href="index.html">Overview</a>
 </li>
 <li>
   <a href="license.html">License</a>
@@ -312,10 +309,10 @@ div.tocify {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-07-06</p>
+<p><strong>Last updated:</strong> 2017-07-17</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 8b5bb74</p>
+<p><strong>Code version:</strong> 7f19dce</p>
 <!-- Add your analysis here -->
 <p>The original IUPAC code is gotten in the way that one finds the bases that has larger frequency than the background probability(default <span class="math inline">\(0.25\)</span>), then corresponds them to the IUPAC code table. There are some problems with this method. Firstly, if the frequencies of <span class="math inline">\(A,C,G,T\)</span> at a position are <span class="math inline">\((0.28,0.24,0.24,0.24)\)</span>, then the code would be A for the position. However, it seems that an N is more appropriate which means any base. Secondly, if the frequencies are <span class="math inline">\((0.35,0.35,0.24,0.06)\)</span>, then the code would be <span class="math inline">\(M(A\)</span> or <span class="math inline">\(C)\)</span> for the position. But a depletion in <span class="math inline">\(T\)</span> may be a better representation. Also, to use <span class="math inline">\((AC)\)</span> representing <span class="math inline">\(A\)</span> or <span class="math inline">\(C\)</span> is more straightforward than introducing extra letters.</p>
 <div id="the-method" class="section level1">
