@@ -1,14 +1,12 @@
-name: Depletion
+name: Logoplot dash
 output_dir: "../docs"
 include: [".nojekyll"]
 exclude: ["include"]
 navbar:
-  title: Depletion
+  title: Logoplot dash
   left:
-    - text: "Home"
+    - text: "Overview"
       href: index.html
-    - text: "About"
-      href: about.html
     - text: "License"
       href: license.html
   right:
