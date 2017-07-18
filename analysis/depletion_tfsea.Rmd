@@ -1,0 +1,77 @@
+---
+title: "TF depletion enrichment"
+author: "Kushal K Dey"
+date: "6/23/2017"
+output: html_document
+---
+
+```{r}
+simpleCap <- function(x) {
+  s <- strsplit(x, " ")[[1]]
+  paste((substring(s, 1,1)), tolower(substring(s, 2)),
+      sep="", collapse=" ")
+}
+```
+
+
+## mouse enrichment analysis
+
+We check here whether depletion is enriched in TFs with specific functional annotations.
+
+```{r}
+all_mouse <- read.table("All Mouse names.txt")[,1]
+depletion_mouse <- read.table("mouse.txt")[,1]
+```
+
+```{r}
+all_mouse_names <- sapply(all_mouse, function(x) strsplit(as.character(x), "_")[[1]][1])
+depletion_mouse_names <- sapply(depletion_mouse, function(x) strsplit(as.character(x), "_")[[1]][1])
+```
+
+```{r}
+all_mouse_names_2 <- as.character(sapply(all_mouse_names, function(x) return(simpleCap(x))))
+depletion_mouse_names_2 <- as.character(sapply(depletion_mouse_names, function(x) return(simpleCap(x))))
+```
+
+```{r}
+write.table(all_mouse_names_2, file = "all_mouse_names.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(depletion_mouse_names_2, file = "depletion_mouse_names.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+No significant functional pathway was observed and no GO was found enriched at $0.01$ level of significance. 
+
+## human enrichment analysis
+
+We check here whether depletion is enriched in TFs with specific functional annotations.
+
+```{r}
+all_human <- read.table("All Human names.txt")[,1]
+depletion_human <- read.table("Human.txt")[,1]
+```
+
+```{r}
+all_human_names <- sapply(all_human, function(x) strsplit(as.character(x), "_")[[1]][1])
+depletion_human_names <- sapply(depletion_human, function(x) strsplit(as.character(x), "_")[[1]][1])
+```
+
+```{r}
+all_human_names_2 <- as.character(sapply(all_human_names, function(x) return(simpleCap(x))))
+depletion_human_names_2 <- as.character(sapply(depletion_human_names, function(x) return(simpleCap(x))))
+```
+
+```{r}
+write.table(all_human_names, file = "all_human_names.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(depletion_human_names, file = "depletion_human_names.txt", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+go <- read.delim2("go_human_depletion.tab")
+```
+
+No pathway was enriched but the following GO annotation was moderatley enriched (although the q value was well above $0.05$)
+
+```{r}
+go
+```
+
+

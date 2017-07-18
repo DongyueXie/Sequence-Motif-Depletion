@@ -11,8 +11,9 @@
 
 <meta name="author" content="Dongyue Xie" />
 
+<meta name="date" content="2017-07-17" />
 
-<title>Consensus</title>
+<title>Consensus Sequence</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -298,9 +299,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Consensus</h1>
+<h1 class="title toc-ignore">Consensus Sequence</h1>
 <h4 class="author"><em>Dongyue Xie</em></h4>
-<h4 class="date"><em>July 4, 2017</em></h4>
+<h4 class="date"><em>2017-07-17</em></h4>
 
 </div>
 
@@ -309,23 +310,40 @@ div.tocify {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-07-17</p>
+<p><strong>Last updated:</strong> 2017-07-18</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 7f19dce</p>
+<p><strong>Code version:</strong> 49915de</p>
 <!-- Add your analysis here -->
 <p>The original IUPAC code is gotten in the way that one finds the bases that has larger frequency than the background probability(default <span class="math inline">\(0.25\)</span>), then corresponds them to the IUPAC code table. There are some problems with this method. Firstly, if the frequencies of <span class="math inline">\(A,C,G,T\)</span> at a position are <span class="math inline">\((0.28,0.24,0.24,0.24)\)</span>, then the code would be A for the position. However, it seems that an N is more appropriate which means any base. Secondly, if the frequencies are <span class="math inline">\((0.35,0.35,0.24,0.06)\)</span>, then the code would be <span class="math inline">\(M(A\)</span> or <span class="math inline">\(C)\)</span> for the position. But a depletion in <span class="math inline">\(T\)</span> may be a better representation. Also, to use <span class="math inline">\((AC)\)</span> representing <span class="math inline">\(A\)</span> or <span class="math inline">\(C\)</span> is more straightforward than introducing extra letters.</p>
-<div id="the-method" class="section level1">
-<h1>The method</h1>
-<p>Here, an improved IUPAC nucleotide code is proposed so that the code could give more information about the enrichment and depletion of bases. We first divide all possible frequencies into the following categories:</p>
+<p>We studied three possible methods that could improve the IUPAC nucleotide code so that the code could give more information about the enrichment and depletion of bases.</p>
+<div id="method-1" class="section level1">
+<h1>Method 1</h1>
+<p>We first divide all possible frequencies into the following categories:</p>
 <ol style="list-style-type: decimal">
-<li>Any base, denoted by <span class="math inline">\(N\)</span>.</li>
 <li>Enrichment in one base, denoted by the base name.</li>
 <li>Enrichments in two bases, denote by the two base names with a bracket. The first one has larger frequency.</li>
 <li>Depletion in one base, denoted by the base name but in lowercase.</li>
 <li>Depletion in one base and an enrichment in another, denoted by the base names(case sensitive) with bracket.</li>
+<li>Any base, denoted by ‘N’</li>
 </ol>
-<p>Then define three kinds of vectors whose length is 3 and the elements sum to 1:</p>
+<p>Then define five vectors whose length is 4 and the elements sum to 1. The vectors correspond to the categories above.</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(V_1\)</span> : One large elements and the others are small, e.g: <span class="math inline">\((1,0,0,0)\)</span>, <span class="math inline">\((0.7,0.1,0.1,0.1)\)</span></li>
+<li><span class="math inline">\(V_2\)</span> : Two large elements and the others are small, e.g: <span class="math inline">\((0.5,0.5,0,0)\)</span>, <span class="math inline">\((0.45,0.45,0.05,0.05)\)</span></li>
+<li><span class="math inline">\(V_3\)</span> : One relatively small elements, e.g:<span class="math inline">\((1/3,1/3,1/3,0)\)</span></li>
+<li><span class="math inline">\(V_4\)</span> : One large and one small elements, e.g: <span class="math inline">\((0.7,0.15,0.15,0)\)</span></li>
+<li><span class="math inline">\(V_5\)</span> : Equal elements, (0.25,0.25,0.25,0.25)</li>
+</ol>
+<p>We sort the base frequencies at a position descendingly and then get the distance between the sorted frequencies and the five vectors defined above. Then we could know the base frequency vector belongs to the category that minimizes the distance. So according to the distances, we could determine which category the position belongs to and then assign the corresponding code.</p>
+<p>The problem then could be formed in a decision theory problem. The action space is <span class="math inline">\(S=\{V_1,V_2,V_3,V_4,V_5\}\)</span>. The action to be taken is <span class="math inline">\(s\in S\)</span>. The loss function is the distance function, e.g. Jensenâ€“Shannon divergence, <span class="math inline">\(L(p,s)=0.5D_{KL}(p||m)+0.5D_{KL}(s||m)\)</span>, where <span class="math inline">\(m=(p+s)/2\)</span> and <span class="math inline">\(D_{KL}(p||q)=\Sigma_ip_i\log(p_i/q_i)\)</span>. A pseudocount <span class="math inline">\(w=0.001\)</span> is added if any of the probability is 0 and then the probability vector is rescaled.</p>
+<p>There are two types of distance function. The first type is the measure of the distance between two discrete distributions. For example, Kullback-Leibler divergence, JensenÄ-Shannon divergence, Bhattacharyya distance. The second type is the vector norm. For example, <span class="math inline">\(L^1\)</span> norm ,<span class="math inline">\(L^2\)</span> norm, infinity norm.</p>
+<p>So for each different choice of <span class="math inline">\(V_1,V_2,V_3,V_4,V_5\)</span> and distance function, we would have one code for the sequence. So in total, there are <span class="math inline">\(n_{v_1}*n_{v_2}*n_{v_3}*n_{v_4}*n_{v_5}*n_{dis}\)</span> codes. To make the result robust to these choices, we take the mode of the code at the each position. And if there are two codes that happen more than <span class="math inline">\(40\%\)</span> of the time, we report both. For example, <span class="math inline">\(A\)</span> happens 3 times and <span class="math inline">\(At\)</span> happens 4 times out of total 7 times, then the code is given by <span class="math inline">\([A-At]\)</span></p>
+</div>
+<div id="method-2" class="section level1">
+<h1>Method 2</h1>
+<p>The five categories are the same as above.</p>
+<p>Define three kinds of vectors whose length is 3 and the elements sum to 1:</p>
 <ol style="list-style-type: decimal">
 <li><span class="math inline">\(V_1\)</span> : One large elements and the others are small, e.g: <span class="math inline">\((1,0,0)\)</span>, <span class="math inline">\((0.8,0.1,0.1)\)</span></li>
 <li><span class="math inline">\(V_2\)</span> : Two large elements and the other one is small, e.g: <span class="math inline">\((0.5,0.5,0)\)</span>, <span class="math inline">\((0.45,0.45,0.1)\)</span></li>
@@ -344,23 +362,41 @@ shared across the workflowr files. -->
 <li><span class="math inline">\((1/3,1/3,1/3),(1/3,1/3,1/3) - N\)</span></li>
 </ol>
 <p>Note that the cases 1,5,6,7 may not be straightforward to understand. Here are some brief explanations. Case 1: the largest one is much larger than the others. Case 5: the first three are larger than the last one. Case 6,7: the first two are larger than the last two. Further, <span class="math inline">\((0.9,0.05,0.05,0)\)</span> would be classified as case 2 however we want it to be case 1. To avoid this, we require that the difference between the smallest and the second smallest should be at least 0.12.</p>
-<p>There are two types of distance function. The first type is the measure of the distance between two discrete distributions. For example, Kullback-Leibler divergence, JensenÄ-Shannon divergence, Bhattacharyya distance. The second type is the vector norm. For example, <span class="math inline">\(L^1\)</span> norm ,<span class="math inline">\(L^2\)</span> norm, infinity norm.</p>
-<p>So for each different choice of <span class="math inline">\(V_1,V_2,V_3\)</span> and distance function, we would have one code for the sequence. So in total, there are <span class="math inline">\(n_{v_1}*n_{v_2}*n_{v_3}*n_{dis}\)</span> codes. To make the result robust to these choices, we take the mode of the code at the each position. And if there are two codes that happen more than <span class="math inline">\(40\%\)</span> of the time, we report both. For example, <span class="math inline">\(A\)</span> happens 3 times and <span class="math inline">\(At\)</span> happens 4 times out of total 7 times, then the code is given by <span class="math inline">\([A-At]\)</span></p>
+<p>Similarly, for each different choice of <span class="math inline">\(V_1,V_2,V_3\)</span> and distance function, we would have one code for the sequence. So in total, there are <span class="math inline">\(n_{v_1}*n_{v_2}*n_{v_3}*n_{dis}\)</span> codes. We also take the mode of the code at the each position as in method 1.</p>
 </div>
-<div id="application" class="section level1">
-<h1>Application</h1>
-<p>In the implementation, we chose <span class="math inline">\(V_1=(0.9,0.05,0.05),(0.85,0.075,0.075),(0.8,0.1,0.1),(0.75,0.125,0.125),(0.7,0.15,0.15)\)</span>, <span class="math inline">\(V_2=(0.5,0.5,0),(0.475,0.475,0.05),(0.45,0.45,0.1)\)</span>, <span class="math inline">\(V_3=(1/3,1/3,1/3)\)</span>.</p>
-<p>The distance functions are symmetric Kullback-Leibler divergence, JensenÄ-Shannon divergence, Bhattacharyya distance, <span class="math inline">\(L^1\)</span> norm, <span class="math inline">\(L^2\)</span> norm, infinity norm. An additional distance function is the average of the above six distance functions but it’s not counted for the final code.</p>
-<p>Then we apply the code to the depletion data we are interested in and compare them with the IUPAC code from atSNP package.</p>
-<p>Dimer:</p>
-<p>IRF family. Mouse.</p>
-<p>The IUPAC code is given firstly followed by our code and the pwm.</p>
-<pre class="r"><code>GetIUPACSequence(DepMouse[[11]]$mat)</code></pre>
-<pre><code>[1] &quot;GGAAASYGAAASBRRRA&quot;</code></pre>
-<pre class="r"><code>Getmotif(DepMouse[[11]]$mat)</code></pre>
-<pre><code>[1] &quot;GGAAAtNGAAAta(GA)(AG)(AG)[N-A]&quot;</code></pre>
-<pre class="r"><code>DepMouse[[11]]$mat</code></pre>
-<pre><code>           1          2          3          4          5          6
+<div id="method-3" class="section level1">
+<h1>Method 3</h1>
+<p>This method usus the height of the negative logo plot, in which the log height is determined by log odds. Still, we have five categories as above and below lists the way we determine the category of a probability vector:</p>
+<ol style="list-style-type: decimal">
+<li>Enrichment in one base: Only one positive logo height is larger than a threshold, <span class="math inline">\(a\)</span> and no negative logo height is larger than a threshold, <span class="math inline">\(c\)</span>.</li>
+<li>Enrichments in two bases: Two positive logo heights are larger than a threshold, <span class="math inline">\(b\)</span>.</li>
+<li>Depletion in one base: Positive logo heights do not satisfy either 1 or 2; One negative logo height is larger than <span class="math inline">\(c\)</span>.</li>
+<li>Depletion in one base and an enrichment in another:Only one positive logo height is larger than <span class="math inline">\(a\)</span> and one negative logo height is larger than <span class="math inline">\(c\)</span>.</li>
+<li>Any base: otherwise.</li>
+</ol>
+<p>Heuristicly, we chose <span class="math inline">\(a=0.25,b=0.12,c=0.14\)</span></p>
+<div id="examples" class="section level2">
+<h2>Examples</h2>
+<p>In the implementation, for method 1, we chose <span class="math inline">\(V_1=(1,0,0,0),(0.85,0.05,0.05,0.05),(0.7,0.1,0.1,0.1)\)</span>, <span class="math inline">\(V_2=(0.5,0.5,0,0),(0.45,0.45,0.05,0.05)\)</span>, <span class="math inline">\(V_3=(1/3,1/3,1/3,0),(0.3,0.3,0.3,0.1)\)</span>, <span class="math inline">\(V_4=(0.8,0.1,0.1,0),(0.7,0.15,0.15,0),(0.6,0.2,0.2,0)\)</span>, <span class="math inline">\(V_5=(0.25,0.25,0.25,0.25)\)</span>;</p>
+<p>for method 2, we chose <span class="math inline">\(V_1=(1,0,0),(0.9,0.05,0.05),(0.85,0.075,0.075),(0.8,0.1,0.1),(0.75,0.125,0.125),(0.7,0.15,0.15)\)</span>, <span class="math inline">\(V_2=(0.5,0.5,0),(0.475,0.475,0.05),(0.45,0.45,0.1)\)</span>, <span class="math inline">\(V_3=(1/3,1/3,1/3)\)</span>.</p>
+<p>The distance functions are symmetric Kullback-Leibler divergence, JensenÄ-Shannon divergence, Bhattacharyya distance, <span class="math inline">\(L^1\)</span> norm, <span class="math inline">\(L^2\)</span> norm, infinity norm.</p>
+<p>Then we apply the code to the depletion data we are interested in(mainly dimer ) and compare them with the IUPAC code from atSNP package.</p>
+<p>Dimer from IRF family, mouse.</p>
+<p>The IUPAC code is given firstly followed by method1, method2, method3 and the PWM.</p>
+<pre class="r"><code>for(i in c(11,12,13)){
+  print(GetIUPACSequence(DepMouse[[i]]$mat))
+  print(Getmotif1(DepMouse[[i]]$mat))
+  print(Getmotif2(DepMouse[[i]]$mat))
+  print(Getmotif3(DepMouse[[i]]$mat))
+  print(DepMouse[[i]]$mat)
+  print(&#39;-----------------------------------&#39;)
+  
+}</code></pre>
+<pre><code>[1] &quot;GGAAASYGAAASBRRRA&quot;
+[1] &quot;GGAAA(Gt)[N/(CT)]GAAAta(GA)(AG)(AG)[N/A]&quot;
+[1] &quot;GGAAAtNGAAAta(GA)[(AG)/t](AG)N&quot;
+[1] &quot;GGAAA(Gt)NGAAAtactAA&quot;
+           1          2          3          4          5          6
 A 0.14609981 0.22921996 0.83184109 0.91496124 0.85262112 0.16687984
 C 0.14609981 0.06297965 0.04219961 0.02141957 0.02141957 0.25000000
 G 0.62404070 0.64482074 0.10453973 0.02141957 0.06297965 0.54092054
@@ -374,13 +410,13 @@ T 0.2915601 0.04219961 0.02141957 0.04219961 0.02141957 0.08375969
 A 0.04219961 0.29156008 0.41624031 0.4785804 0.4785804
 C 0.33312016 0.08375969 0.16687984 0.1045397 0.1668798
 G 0.27078004 0.43702035 0.33312016 0.2915601 0.1668798
-T 0.35390019 0.18765988 0.08375969 0.1253198 0.1876599</code></pre>
-<pre class="r"><code>GetIUPACSequence(DepMouse[[12]]$mat)</code></pre>
-<pre><code>[1] &quot;AAAARAGRAAVTGARA&quot;</code></pre>
-<pre class="r"><code>Getmotif(DepMouse[[12]]$mat)</code></pre>
-<pre><code>[1] &quot;NAA(Ac)(AG)AG(AG)AAt[(TA)-T]GA[(AG)-A]A&quot;</code></pre>
-<pre class="r"><code>DepMouse[[12]]$mat</code></pre>
-<pre><code>          1          2         3          4          5         6
+T 0.35390019 0.18765988 0.08375969 0.1253198 0.1876599
+[1] &quot;-----------------------------------&quot;
+[1] &quot;AAAARAGRAAVTGARA&quot;
+[1] &quot;(AG)AA(Ac)(AG)AG(AG)AAtTGAAA&quot;
+[1] &quot;NAA[c/(Ac)](AG)AG(AG)AAtTGA[(AG)/A]A&quot;
+[1] &quot;NAA(Ac)(AG)A(GA)(AG)AAtTGA(AG)A&quot;
+          1          2         3          4          5         6
 A 0.4549524 0.62451035 0.6317851 0.58310017 0.43872412 0.6424175
 C 0.1897034 0.07162843 0.0581981 0.02182429 0.11247902 0.0581981
 G 0.2355904 0.13822048 0.1796307 0.22160045 0.37381086 0.1941802
@@ -394,13 +430,13 @@ T 0.008393956 0.001678791 0.0005595971 0.001678791 0.001119194 0.56071628
 A 0.17123671 0.88864018 0.704532736 0.883603805
 C 0.04924454 0.02518187 0.020145495 0.050923335
 G 0.76273083 0.06939004 0.273642977 0.064353665
-T 0.01678791 0.01678791 0.001678791 0.001119194</code></pre>
-<pre class="r"><code>GetIUPACSequence(DepMouse[[13]]$mat)</code></pre>
-<pre><code>[1] &quot;GRGRAAVTGAAASYR&quot;</code></pre>
-<pre class="r"><code>Getmotif(DepMouse[[13]]$mat)</code></pre>
-<pre><code>[1] &quot;G(AG)G(AG)AAtTGAAA[N-(CG)](TC)(GA)&quot;</code></pre>
-<pre class="r"><code>DepMouse[[13]]$mat</code></pre>
-<pre><code>          1          2          3          4          5          6
+T 0.01678791 0.01678791 0.001678791 0.001119194
+[1] &quot;-----------------------------------&quot;
+[1] &quot;GRGRAAVTGAAASYR&quot;
+[1] &quot;G(AG)G(AG)AAtTGAAA[N/(CG)](TC)(GA)&quot;
+[1] &quot;G(AG)G(AG)AAtTGAAAN(TC)(GA)&quot;
+[1] &quot;GtG(AG)AAtTGAAANaN&quot;
+          1          2          3          4          5          6
 A 0.1704854 0.43961180 0.14601933 0.51300992 0.90446654 0.85553446
 C 0.1704854 0.12155330 0.07262122 0.04815518 0.02368914 0.04815518
 G 0.4885439 0.34174765 0.70873823 0.41514576 0.04815518 0.04815518
@@ -414,14 +450,22 @@ T 0.02368914 0.6353401 0.04815518 0.02368914 0.02368914 0.07262122
 A 0.1704854 0.07262122 0.3417476
 C 0.3417476 0.34174765 0.1460193
 G 0.3417476 0.12155330 0.3906797
-T 0.1460193 0.46407784 0.1215533</code></pre>
-<p>SOX family. Mouse.</p>
-<pre class="r"><code>GetIUPACSequence(DepMouse[[27]]$mat)</code></pre>
-<pre><code>[1] &quot;CAMMAAWSHHCATTGTCS&quot;</code></pre>
-<pre class="r"><code>Getmotif(DepMouse[[27]]$mat)</code></pre>
-<pre><code>[1] &quot;CA(AC)(CA)AATN[N-g]gCATTGTCN&quot;</code></pre>
-<pre class="r"><code>DepMouse[[27]]$mat</code></pre>
-<pre><code>           1          2          3          4          5          6
+T 0.1460193 0.46407784 0.1215533
+[1] &quot;-----------------------------------&quot;</code></pre>
+<p>Dimer from SOX family, mouse.</p>
+<pre class="r"><code>for(i in c(27,28)){
+  print(GetIUPACSequence(DepMouse[[i]]$mat))
+  print(Getmotif1(DepMouse[[i]]$mat))
+  print(Getmotif2(DepMouse[[i]]$mat))
+  print(Getmotif3(DepMouse[[i]]$mat))
+  print(DepMouse[[i]]$mat)
+  print(&#39;-----------------------------------&#39;)
+}</code></pre>
+<pre><code>[1] &quot;CAMMAAWSHHCATTGTCS&quot;
+[1] &quot;CA[(AC)/A](CA)AATNggCATTGTCN&quot;
+[1] &quot;CA(AC)(CA)AA[c/T]NggCATTGTC[N/(CG)]&quot;
+[1] &quot;CA(AC)(CA)A(Ac)(Tc)NggCATTGT(Ca)N&quot;
+           1          2          3          4          5          6
 A 0.14794692 0.75210114 0.62147320 0.37654582 0.80108662 0.70311567
 C 0.65413019 0.16427541 0.31123185 0.58881622 0.16427541 0.01731898
 G 0.09896144 0.06630446 0.01731898 0.01731898 0.01731898 0.06630446
@@ -435,13 +479,13 @@ T 0.60514471 0.2295894 0.3112318 0.36021732 0.19693240 0.01731898
 A 0.01731898 0.01731898 0.01731898 0.01731898 0.01731898 0.1642754
 C 0.01731898 0.01731898 0.01731898 0.01731898 0.67045868 0.3928743
 G 0.01731898 0.01731898 0.94804305 0.01731898 0.21326089 0.2785749
-T 0.94804305 0.94804305 0.01731898 0.94804305 0.09896144 0.1642754</code></pre>
-<pre class="r"><code>GetIUPACSequence(DepMouse[[28]]$mat)</code></pre>
-<pre><code>[1] &quot;KCCWTTGTBYY&quot;</code></pre>
-<pre class="r"><code>Getmotif(DepMouse[[28]]$mat)</code></pre>
-<pre><code>[1] &quot;aCCTTTGTa(TC)N&quot;</code></pre>
-<pre class="r"><code>DepMouse[[28]]$mat</code></pre>
-<pre><code>           1           2           3           4           5           6
+T 0.94804305 0.94804305 0.01731898 0.94804305 0.09896144 0.1642754
+[1] &quot;-----------------------------------&quot;
+[1] &quot;KCCWTTGTBYY&quot;
+[1] &quot;aCC[(TA)/T]TTGTa(TC)(CT)&quot;
+[1] &quot;aCCTTTGTa(TC)N&quot;
+[1] &quot;a(Ca)(CT)(TA)TTGTa(TC)a&quot;
+           1           2           3           4           5           6
 A 0.05727837 0.007607848 0.009594669 0.269868209 0.001647385 0.001647385
 C 0.22814497 0.683126961 0.758626156 0.007607848 0.025489236 0.003634206
 G 0.45265573 0.186421731 0.001647385 0.003634206 0.003634206 0.001647385
@@ -450,16 +494,22 @@ T 0.26192093 0.122843461 0.230131791 0.718889737 0.969229173 0.993071024
 A 0.009594669 0.003634206 0.003634206 0.05330473 0.1248303
 C 0.069199296 0.003634206 0.371196076 0.40894567 0.3553015
 G 0.917571829 0.001647385 0.257947284 0.08708068 0.2062899
-T 0.003634206 0.991084204 0.367222434 0.45066891 0.3135783</code></pre>
+T 0.003634206 0.991084204 0.367222434 0.45066891 0.3135783
+[1] &quot;-----------------------------------&quot;</code></pre>
 <p>EFB1 family:</p>
 <pre class="r"><code>for (i in grep(&#39;EBF1&#39;,names(DepEncode))){
 print(names(DepEncode[i]))
 print(GetIUPACSequence(DepEncode[[i]]$mat))
-print(Getmotif(DepEncode[[i]]$mat))
+print(Getmotif1(DepEncode[[i]]$mat))
+print(Getmotif2(DepEncode[[i]]$mat))
+print(Getmotif3(DepEncode[[i]]$mat))
 print(DepEncode[[i]]$mat)
+print(&#39;------------------------------------------&#39;)
 }</code></pre>
 <pre><code>[1] &quot;EBF1_disc1&quot;
 [1] &quot;TCCCHDGGGA&quot;
+[1] &quot;TCCCgcGGGA&quot;
+[1] &quot;TCCCgcGGGA&quot;
 [1] &quot;TCCCgcGGGA&quot;
              1            2            3            4          5
 A 0.0009960159 0.0009960159 0.0009960159 0.0009960159 0.29774402
@@ -471,9 +521,12 @@ A 0.33593924 0.0009960159 0.1772818725 0.0009960159 0.8824262948
 C 0.02156275 0.0009960159 0.0009960159 0.0009960159 0.0009960159
 G 0.37413446 0.9970119522 0.8207260956 0.9970119522 0.1155816733
 T 0.26836355 0.0009960159 0.0009960159 0.0009960159 0.0009960159
+[1] &quot;------------------------------------------&quot;
 [1] &quot;EBF1_known1&quot;
 [1] &quot;VDMDABTCCCYRRRGRRBDKRB&quot;
-[1] &quot;NN(Ct)c(Ac)aTCCC(CT)(AG)G(GA)G(Ac)(GA)aN(TG)(Gt)N&quot;
+[1] &quot;[N/t][N/c](Ct)c(Ac)aTCCC(CT)[(AG)/A]G(GA)G(Ac)(GA)a[N/c](TG)(Gt)[N/a]&quot;
+[1] &quot;[N/t][N/c]tc(Ac)aTCCC(CT)(AG)G(GA)Gc(GA)a[N/c](TG)t[N/a]&quot;
+[1] &quot;NN(Ct)c(Ac)aTCCC(CT)A(GA)(GA)G(Ac)(GA)aN(TG)(Gt)N&quot;
          1        2            3            4            5            6
 A 0.250000 0.374502 0.2500000000 0.3745019920 0.7480079681 0.0009960159
 C 0.374502 0.125498 0.6235059761 0.0009960159 0.0009960159 0.3745019920
@@ -494,8 +547,11 @@ A 0.3745019920 0.0009960159 0.250000 0.0009960159 0.2500000000 0.125498
 C 0.1254980080 0.2500000000 0.125498 0.1254980080 0.1254980080 0.250000
 G 0.4990039841 0.3745019920 0.250000 0.3745019920 0.6235059761 0.250000
 T 0.0009960159 0.3745019920 0.374502 0.4990039841 0.0009960159 0.374502
+[1] &quot;------------------------------------------&quot;
 [1] &quot;EBF1_known2&quot;
 [1] &quot;KTCCCYWGRGA&quot;
+[1] &quot;aTCCC(TC)(TA)G(GA)G(Ac)&quot;
+[1] &quot;aTCCC(TC)(TA)G(GA)G[c/(Ac)]&quot;
 [1] &quot;aTCCC(TC)(TA)G(GA)G(Ac)&quot;
              1            2            3            4            5
 A 0.0009960159 0.0009960159 0.0009960159 0.0009960159 0.0009960159
@@ -512,9 +568,12 @@ A 0.5986055777
 C 0.0009960159
 G 0.2001992032
 T 0.2001992032
+[1] &quot;------------------------------------------&quot;
 [1] &quot;EBF1_known4&quot;
 [1] &quot;ATTCCCHWGGGAMT&quot;
 [1] &quot;ANTCCCg(AT)GGGA(AC)T&quot;
+[1] &quot;ANTCCCg[(AT)/c]GGGA(AC)g&quot;
+[1] &quot;ANTCCCg(Ac)GGGA(AC)(Tg)&quot;
            1         2            3            4           5            6
 A 0.71704382 0.1666763 0.0213227092 0.0009960149 0.002900398 0.0009960159
 C 0.07518127 0.1789253 0.1284511952 0.9944382470 0.981142430 0.9931563745
@@ -529,7 +588,9 @@ T 0.34202689 0.31192829 0.0009960159 0.0009960159 0.0149352590 0.01531873
 A 0.39062948 0.16226793
 C 0.37901793 0.23580777
 G 0.09453386 0.05324795
-T 0.13581972 0.54867629</code></pre>
+T 0.13581972 0.54867629
+[1] &quot;------------------------------------------&quot;</code></pre>
+</div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <!-- Insert the session information into the document -->
@@ -552,10 +613,9 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] plyr_1.8.4          ggplot2_2.2.1       Logolas_1.1.2      
- [4] TFBSTools_1.14.0    JASPAR2014_1.12.0   Biostrings_2.43.8  
- [7] XVector_0.15.2      IRanges_2.9.19      S4Vectors_0.13.17  
-[10] BiocGenerics_0.22.0
+[1] Logolas_1.1.2       TFBSTools_1.14.0    JASPAR2014_1.12.0  
+[4] Biostrings_2.43.8   XVector_0.15.2      IRanges_2.9.19     
+[7] S4Vectors_0.13.17   BiocGenerics_0.22.0
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.11                lattice_0.20-35            
@@ -563,35 +623,35 @@ loaded via a namespace (and not attached):
  [5] Rsamtools_1.27.16           gtools_3.5.0               
  [7] rprojroot_1.2               digest_0.6.12              
  [9] R6_2.2.0                    GenomeInfoDb_1.12.0        
-[11] backports_1.0.5             RSQLite_1.1-2              
-[13] evaluate_0.10               httr_1.2.1                 
-[15] zlibbioc_1.21.0             lazyeval_0.2.0             
-[17] annotate_1.54.0             R.utils_2.5.0              
-[19] R.oo_1.21.0                 Matrix_1.2-9               
-[21] rmarkdown_1.6               splines_3.4.0              
-[23] BiocParallel_1.10.0         readr_1.1.1                
-[25] stringr_1.2.0               CNEr_1.12.0                
-[27] RCurl_1.95-4.8              munsell_0.4.3              
-[29] DelayedArray_0.2.0          compiler_3.4.0             
-[31] rtracklayer_1.35.12         seqLogo_1.42.0             
-[33] DirichletMultinomial_1.18.0 htmltools_0.3.5            
-[35] KEGGREST_1.16.0             SummarizedExperiment_1.6.0 
-[37] tibble_1.3.0                GenomeInfoDbData_0.99.0    
-[39] matrixStats_0.52.2          XML_3.98-1.6               
-[41] TFMPvalue_0.0.6             GenomicAlignments_1.11.12  
-[43] bitops_1.0-6                R.methodsS3_1.7.1          
-[45] grid_3.4.0                  xtable_1.8-2               
-[47] gtable_0.2.0                DBI_0.6-1                  
-[49] git2r_0.18.0                magrittr_1.5               
-[51] scales_0.4.1                stringi_1.1.5              
-[53] reshape2_1.4.2              RColorBrewer_1.1-2         
-[55] tools_3.4.0                 BSgenome_1.44.0            
-[57] Biobase_2.35.1              poweRlaw_0.70.0            
-[59] hms_0.3                     yaml_2.1.14                
-[61] AnnotationDbi_1.38.1        colorspace_1.3-2           
-[63] GenomicRanges_1.27.23       caTools_1.17.1             
-[65] memoise_1.1.0               VGAM_1.0-3                 
-[67] knitr_1.15.1               </code></pre>
+[11] plyr_1.8.4                  backports_1.0.5            
+[13] RSQLite_1.1-2               evaluate_0.10              
+[15] httr_1.2.1                  ggplot2_2.2.1              
+[17] zlibbioc_1.21.0             lazyeval_0.2.0             
+[19] annotate_1.54.0             R.utils_2.5.0              
+[21] R.oo_1.21.0                 Matrix_1.2-9               
+[23] rmarkdown_1.6               splines_3.4.0              
+[25] BiocParallel_1.10.0         readr_1.1.1                
+[27] stringr_1.2.0               CNEr_1.12.0                
+[29] RCurl_1.95-4.8              munsell_0.4.3              
+[31] DelayedArray_0.2.0          compiler_3.4.0             
+[33] rtracklayer_1.35.12         seqLogo_1.42.0             
+[35] DirichletMultinomial_1.18.0 htmltools_0.3.5            
+[37] KEGGREST_1.16.0             SummarizedExperiment_1.6.0 
+[39] tibble_1.3.0                GenomeInfoDbData_0.99.0    
+[41] matrixStats_0.52.2          XML_3.98-1.6               
+[43] TFMPvalue_0.0.6             GenomicAlignments_1.11.12  
+[45] bitops_1.0-6                R.methodsS3_1.7.1          
+[47] grid_3.4.0                  xtable_1.8-2               
+[49] gtable_0.2.0                DBI_0.6-1                  
+[51] git2r_0.18.0                magrittr_1.5               
+[53] scales_0.4.1                stringi_1.1.5              
+[55] reshape2_1.4.2              tools_3.4.0                
+[57] BSgenome_1.44.0             Biobase_2.35.1             
+[59] poweRlaw_0.70.0             hms_0.3                    
+[61] yaml_2.1.14                 AnnotationDbi_1.38.1       
+[63] colorspace_1.3-2            GenomicRanges_1.27.23      
+[65] caTools_1.17.1              memoise_1.1.0              
+[67] VGAM_1.0-3                  knitr_1.15.1               </code></pre>
 </div>
 </div>
 

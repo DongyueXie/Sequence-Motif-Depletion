@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dongyue Xie" />
+
+<meta name="date" content="2017-07-10" />
+
+<title>EDA and dash</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Logoplot dash</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">EDA and <em>dash</em></h1>
+<h4 class="author"><em>Dongyue Xie</em></h4>
+<h4 class="date"><em>2017-07-10</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-07-18</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 49915de</p>
+<!-- Add your analysis here -->
+<p>We did the explorative data analysis on the data from JASPAR2014 and HOCOMOCO. The analysis mainly includes PFM position counts, number of positions and the sample size.</p>
+<div id="pfm-position-counts." class="section level1">
+<h1>PFM position counts.</h1>
+<p>Different methods of getting the PFM may result in different position counts, which are the column sums of the position frequency matrix(PFM). For some PFMs, the counts of each position are the same while this may not be true for the the other PFMs. For example:</p>
+<pre class="r"><code>mat=rbind(c(3,2,0,0,5),c(2,4,4,2,1),c(5,6,3,5,5),c(5,3,8,8,4))
+rownames(mat)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(mat)=1:5
+print(&#39;This PFM has the same counts in each position&#39;)</code></pre>
+<pre><code>[1] &quot;This PFM has the same counts in each position&quot;</code></pre>
+<pre class="r"><code>mat</code></pre>
+<pre><code>  1 2 3 4 5
+A 3 2 0 0 5
+C 2 4 4 2 1
+G 5 6 3 5 5
+T 5 3 8 8 4</code></pre>
+<pre class="r"><code>colSums(mat)</code></pre>
+<pre><code> 1  2  3  4  5 
+15 15 15 15 15 </code></pre>
+<p>Here, we compare column sums of PFM from Chip-seq, HT-SELEX, Chip-on-Chip and from JASPAR 2014, HOCOMOCO.</p>
+<div id="chip-seq" class="section level2">
+<h2>Chip-seq</h2>
+<div id="pfms-from-jaspar2014" class="section level3">
+<h3>PFMs from JASPAR2014</h3>
+<pre class="r"><code>#extract PFMs from JASPAR 2014
+opts = list()
+Jas_all=getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &quot;ChiP-seq&quot;
+Jas_C1 = getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &#39;Chip-seq&#39;
+Jas_C2 = getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &#39;ChIP-seq&#39;
+Jas_C3 = getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &#39;ChIP-Seq&#39;
+Jas_C4 = getMatrixSet(JASPAR2014,opts)
+Jas_Chipseq = c(Jas_C1,Jas_C2,Jas_C3,Jas_C4)
+Jas_Chipseq_sum=lapply(Jas_Chipseq,colSums)</code></pre>
+<p>Find the number of PFMs that have different column sums:</p>
+<pre class="r"><code>#A function to check if all the elements are equal in a vector. 1 if equal 
+checkequal=function(x){
+  return(ifelse(sum(x==x[1])==length(x),1,0))
+}
+
+paste(sum(unlist(lapply(Jas_Chipseq_sum,checkequal))),&#39;/&#39;,length(Jas_Chipseq))</code></pre>
+<pre><code>[1] &quot;133 / 145&quot;</code></pre>
+<p>There are 133 out of 145 PFMs have the same column sums.</p>
+</div>
+<div id="pfms-from-hocomoco" class="section level3">
+<h3>PFMs from HOCOMOCO</h3>
+<p>Human:</p>
+<pre class="r"><code>chipname=read.csv(&#39;C:/Users/happy/OneDrive/Research/Logoplot dash/data/chipname.csv&#39;,header = T)
+HO_Human_chipseq=HO_Human[unique(unlist(lapply(chipname$UniProt.ID,grep,x=names(HO_Human))))]
+HO_Human_chipseq_sum=lapply(HO_Human_chipseq,colSums)
+paste(sum(unlist(lapply(HO_Human_chipseq_sum,checkequal))),&#39;/&#39;,length(HO_Human_chipseq))</code></pre>
+<pre><code>[1] &quot;339 / 339&quot;</code></pre>
+<p>Each PFM has the same column sums.</p>
+<p>Mouse:</p>
+<pre class="r"><code>HO_Mouse_chipseq=HO_Mouse[unique(unlist(lapply(chipname$UniProt.ID,grep,x=names(HO_Mouse))))]
+HO_Mouse_chipseq_sum=lapply(HO_Mouse_chipseq,colSums)
+paste(sum(unlist(lapply(HO_Mouse_chipseq_sum,checkequal))),&#39;/&#39;,length(HO_Mouse_chipseq))</code></pre>
+<pre><code>[1] &quot;89 / 89&quot;</code></pre>
+<p>Each PFM has the same column sums.</p>
+</div>
+</div>
+<div id="ht-selex" class="section level2">
+<h2>HT-SELEX</h2>
+<div id="pfms-from-jaspar2014-1" class="section level3">
+<h3>PFMs from JASPAR2014</h3>
+<pre class="r"><code>opts[[&quot;type&quot;]] = &quot;SELEX&quot;
+Jas_s1=getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &#39;High-throughput SELEX SAGE&#39;
+Jas_s2=getMatrixSet(JASPAR2014,opts)
+Jas_selex = c(Jas_s1,Jas_s2)
+Jas_selex_sum=lapply(Jas_selex,colSums)
+paste(sum(unlist(lapply(Jas_selex_sum,checkequal))),&#39;/&#39;,length(Jas_selex))</code></pre>
+<pre><code>[1] &quot;100 / 112&quot;</code></pre>
+<p>There are 100 out of 112 PFMs have the same column sums.</p>
+</div>
+<div id="pfms-from-hocomoco-1" class="section level3">
+<h3>PFMs from HOCOMOCO</h3>
+<p>Human:</p>
+<pre class="r"><code>HO_Human_selex=HO_Human[-unique(unlist(lapply(chipname$UniProt.ID,grep,x=names(HO_Human))))]
+HO_Human_selex_sum=lapply(HO_Human_selex,colSums)
+paste(sum(unlist(lapply(HO_Human_selex_sum,checkequal))),&#39;/&#39;,length(HO_Human_selex))</code></pre>
+<pre><code>[1] &quot;301 / 301&quot;</code></pre>
+<p>Each PFM has the same column sums.</p>
+<p>Mouse:</p>
+<pre class="r"><code>HO_Mouse_selex=HO_Mouse[-unique(unlist(lapply(chipname$UniProt.ID,grep,x=names(HO_Mouse))))]
+HO_Mouse_selex_sum=lapply(HO_Mouse_selex,colSums)
+paste(sum(unlist(lapply(HO_Mouse_selex_sum,checkequal))),&#39;/&#39;,length(HO_Mouse_selex))</code></pre>
+<pre><code>[1] &quot;337 / 337&quot;</code></pre>
+<p>Each PFM has the same column sums.</p>
+</div>
+</div>
+<div id="chip-on-chip" class="section level2">
+<h2>Chip-on-chip</h2>
+<div id="pfms-from-jaspar2014-2" class="section level3">
+<h3>PFMs from JASPAR2014</h3>
+<pre class="r"><code>opts[[&#39;type&#39;]] = &quot;ChIP-on-chip&quot;
+Jas_co1=getMatrixSet(JASPAR2014,opts)
+opts[[&#39;type&#39;]] = &#39;ChIP-chip&#39;
+Jas_co2=getMatrixSet(JASPAR2014,opts)
+Jas_coc = c(Jas_co1,Jas_co2)
+Jas_coc_sum = lapply(Jas_coc,colSums)
+paste(sum(unlist(lapply(Jas_coc_sum,checkequal))),&#39;/&#39;,length(Jas_coc))</code></pre>
+<pre><code>[1] &quot;23 / 44&quot;</code></pre>
+<p>There are 23 out of 44 PFMs have the same column sums.</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>For JASPAR 2014, most of the PFMs from HT-SELEX and Chip-seq have the same counts on each position. About half of the PFMs from Chip-on-Chip have the same counts on each position.</p>
+<p>For HOCOMOCO data, each PFM has the same column sums. Below are quotes from Kulakovskiy <em>et al.</em>(2016), in which discussed the data processing of HOCOMOCO.</p>
+<p>According to Kulakovskiy <em>et al.</em>(2016), the Chip-seq data are from GTRD (Gene Transcription Regulation Database, <a href="http://gtrd.biouml.org" class="uri">http://gtrd.biouml.org</a>, September 2013 release). For Chip-seq data,</p>
+<blockquote>
+<p>“The analysis was done as follows: reads were aligned to reference genomes (hg19/mm9) using Bowtie(with parameters: â€“best â€“strata -a -m 10) and the ChIP-Seq peaks were identified using SISSRS(default parameters). All datasets were linked to UniProt IDs. The even ranked peaks were taken for motif discovery and the odd ranked peaks were used as an independent control data for benchmarking.”</p>
+</blockquote>
+<p>For the HT-SELEX data processing,</p>
+<blockquote>
+<p>“Raw reads from 542 HT-SELEX experiments were processed in the following way. Low-quality read segments were masked with poly-Ns ensuring at least a Q30 average Phred quality score in 10 bp sliding windows. Then, read counts were calculated for all reads for each pair of consequent (n, n + 1) SELEX cycles. Only reads with counts increased in (n + 1) cycle as compared to (n) cycle were kept and aggregated. The largest read count from any of the SELEX cycles was used as a sequence weight for each read. Motif discovery with ChIPMunk and diChIPMunk was performed in a weighted mode on reads from each HT-SELEX experiment, separately (HTSELEX-R models) and additionally for TFs with multiple experiments, by integrating data from all respective sets (HTSELEX-I models).”</p>
+</blockquote>
+</div>
+</div>
+<div id="number-of-positions" class="section level1">
+<h1>Number of positions</h1>
+<p>This section compares the distributon of the number of positons in TF biding sites from SELEX and CHIP-seq. Data are from JASPAR2014.</p>
+<pre class="r"><code>ns = lapply(Jas_selex,function(x) dim(x)[2])
+nc = lapply(Jas_Chipseq,function(x) dim(x)[2])
+dat = data.frame(method = factor(rep(c(&quot;SELEX&quot;,&quot;CHIP&quot;), c(length(Jas_selex),length(Jas_Chipseq)))),number = as.numeric(c(ns,nc)))
+mdat = ddply(dat,&quot;method&quot;,summarise,nummean=mean(number))
+
+ggplot(dat,aes(x = number, fill = method)) +
+    geom_histogram(binwidth = 1, alpha = 0.5, position=&quot;identity&quot;) +
+    geom_vline(data=mdat,aes(xintercept = nummean,colour = method),linetype=&quot;dashed&quot;, size=1)</code></pre>
+<p><img src="figure/ColSums_of_PFM.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ggplot(dat,aes(x = number,colour = method,fill = method)) +
+#    geom_density(alpha=0.2) +
+#    geom_vline(data = mdat,aes(xintercept = nummean,colour = #method),linetype=&quot;dashed&quot;, size=1)</code></pre>
+<p>The mean number of positions from ChIP-seq is slightly larger than that from HT-SELEX.</p>
+</div>
+<div id="sample-size" class="section level1">
+<h1>Sample size</h1>
+<p>Here, sample size refers to the total counts of each position of a PFM. For example, the sample sizes for the PFM below are 15.</p>
+<pre><code>  1 2 3 4 5
+A 3 2 0 0 5
+C 2 4 4 2 1
+G 5 6 3 5 5
+T 5 3 8 8 4</code></pre>
+<p>In JASPAR2014 and HOCOMOCO, there are some PFMs whose sample size is small, say less than 20. In such cases, the estimate of frequencies may not be reliable. For example, if the counts are (2,1,1,0), then (0.5,0.25,0.25,0) is not a good estimate.</p>
+<p>Now we are going to find whether there are a large number of small sample size cases.</p>
+<pre class="r"><code>#a function to check whether the total counts at the fist position is &lt;20.
+checksize=function(x,n=20){
+  x=as.matrix(x)
+  return(sum(x[,1])&lt;20)
+}
+#JASPAR
+sum(unlist(lapply(Jas_all,checksize)))</code></pre>
+<pre><code>[1] 85</code></pre>
+<pre class="r"><code>#HOCOMOCO
+sum(unlist(lapply(HO_Human,checksize)))+sum(unlist(lapply(HO_Mouse,checksize)))</code></pre>
+<pre><code>[1] 241</code></pre>
+<p>There are 85 out of 593 PFMs from JASPAR2014 and 241 out of 1066 PFMs from HOCOMOCO have small sample size.</p>
+<p>One way to account for the samll sample size and give a better estimate of frequencies is to use Dirichlet adaptive shrinkage, <em>dash</em>. When the sample size is small, we consider “shrinking” each frequency to 0.25, which is more reasonable.</p>
+<p>Here is an example.</p>
+<pre class="r"><code>pfm=rbind(c(2,1,1,0),c(4,0,0,0),c(10,10,200,20))
+dashm=dash(pfm,optmethod = &#39;mixEM&#39;)</code></pre>
+<p>The <em>dash</em> estimate is</p>
+<pre class="r"><code>round(dashm$posmean,4)</code></pre>
+<pre><code>       [,1]   [,2]   [,3]   [,4]
+[1,] 0.2599 0.2500 0.2500 0.2401
+[2,] 0.6803 0.1066 0.1066 0.1066
+[3,] 0.0434 0.0434 0.8286 0.0847</code></pre>
+<p>The MLE is</p>
+<pre class="r"><code>round(dashm$datamean,4)</code></pre>
+<pre><code>       [,1]   [,2]   [,3]   [,4]
+[1,] 0.5000 0.2500 0.2500 0.0000
+[2,] 1.0000 0.0000 0.0000 0.0000
+[3,] 0.0417 0.0417 0.8333 0.0833</code></pre>
+<p>The results conform to our analysis. See <a href="dash.html">here</a> for more details about <em>dash</em>.</p>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Ivan V. Kulakovskiy, Ilya E. Vorontsov, Ivan S. Yevshin, Anastasiia V. Soboleva, Artem S. Kasianov, Haitham Ashoor, Wail Ba-alawi, Vladimir B. Bajic, Yulia A. Medvedeva, Fedor A. Kolpakov, Vsevolod J. Makeev; HOCOMOCO: expansion and enhancement of the collection of transcription factor binding sites models. <em>Nucleic Acids Res</em> 2016; 44 (D1): D116-D125.</p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.0 (2017-04-21)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 15063)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252 
+[2] LC_CTYPE=English_United States.1252   
+[3] LC_MONETARY=English_United States.1252
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] dash_0.99.0         SQUAREM_2016.8-2    plyr_1.8.4         
+ [4] ggplot2_2.2.1       Logolas_1.1.2       TFBSTools_1.14.0   
+ [7] JASPAR2014_1.12.0   Biostrings_2.43.8   XVector_0.15.2     
+[10] IRanges_2.9.19      S4Vectors_0.13.17   BiocGenerics_0.22.0
+
+loaded via a namespace (and not attached):
+ [1] Biobase_2.35.1              httr_1.2.1                 
+ [3] VGAM_1.0-3                  LaplacesDemon_16.0.1       
+ [5] splines_3.4.0               R.utils_2.5.0              
+ [7] gtools_3.5.0                BSgenome_1.44.0            
+ [9] GenomeInfoDbData_0.99.0     Rsamtools_1.27.16          
+[11] yaml_2.1.14                 DirichletMultinomial_1.18.0
+[13] RSQLite_1.1-2               backports_1.0.5            
+[15] lattice_0.20-35             digest_0.6.12              
+[17] GenomicRanges_1.27.23       RColorBrewer_1.1-2         
+[19] colorspace_1.3-2            htmltools_0.3.5            
+[21] Matrix_1.2-9                R.oo_1.21.0                
+[23] XML_3.98-1.6                zlibbioc_1.21.0            
+[25] xtable_1.8-2                GO.db_3.4.1                
+[27] scales_0.4.1                BiocParallel_1.10.0        
+[29] git2r_0.18.0                tibble_1.3.0               
+[31] annotate_1.54.0             KEGGREST_1.16.0            
+[33] SummarizedExperiment_1.6.0  TFMPvalue_0.0.6            
+[35] lazyeval_0.2.0              magrittr_1.5               
+[37] memoise_1.1.0               poweRlaw_0.70.0            
+[39] evaluate_0.10               R.methodsS3_1.7.1          
+[41] CNEr_1.12.0                 tools_3.4.0                
+[43] hms_0.3                     matrixStats_0.52.2         
+[45] stringr_1.2.0               munsell_0.4.3              
+[47] DelayedArray_0.2.0          AnnotationDbi_1.38.1       
+[49] compiler_3.4.0              GenomeInfoDb_1.12.0        
+[51] caTools_1.17.1              grid_3.4.0                 
+[53] RCurl_1.95-4.8              bitops_1.0-6               
+[55] labeling_0.3                rmarkdown_1.6              
+[57] gtable_0.2.0                DBI_0.6-1                  
+[59] reshape2_1.4.2              R6_2.2.0                   
+[61] GenomicAlignments_1.11.12   knitr_1.15.1               
+[63] seqLogo_1.42.0              rtracklayer_1.35.12        
+[65] rprojroot_1.2               readr_1.1.1                
+[67] stringi_1.1.5               Rcpp_0.12.11               
+[69] png_0.1-7                  </code></pre>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
