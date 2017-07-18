@@ -1,0 +1,127 @@
+---
+title: "Negative Logo plot"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+# Introduction
+
+In the logo plots, the transcription factor binding sequence patterns are visualized. The enrichment is highlighted while the depletion is usually overlooked. In the negative logo plot, the depletion is plotted down below the zero on y-axis so that we can find both strong positive and negative effects. 
+
+The *nlogomaker* function from R package "Logolas" provides negative logo plots. And there are three different options of logo heights: information content, log probability and log-odds. More details can be found here: https://github.com/kkdey/Logolas. 
+
+The following section presents some negative logo plots to give us an initial look at them.
+
+#Example plots
+
+```{r,include=FALSE}
+library(JASPAR2014)
+library(TFBSTools)
+library(Logolas)
+```
+
+The data of this example are from JASPAR2014. JASPAR is a collection of transcription factor DNA-binding preferences. We used the data from R package "JASPAR2014". There are total 593 PFMs. We show the logo plot firstly and then the negative plot. Also, the corresponding IUPAC code is given as a reference. See http://www.bioinformatics.org/sms/iupac.html for the IUPAC code.
+
+
+```{r}
+#extract all pfms
+opts = list()
+PFMlist = getMatrixSet(JASPAR2014,opts)
+opts2 = list()
+opts2[["type"]] = "SELEX"
+#get the PFMs from SELEX
+PFMselex = getMatrixSet(JASPAR2014, opts2)
+#get the PFMs from 'CHIP'
+opts3 = list()
+opts3[['type']] = 'ChIP-seq'
+PFMchip = getMatrixSet(JASPAR2014,opts3)
+
+#methods in JASPAR2014
+mtd=c()
+for(i in 1:593){mtd[i]=ifelse(is.null(PFMlist[[i]]@tags$type),'',PFMlist[[i]]@tags$type)}
+unique(mtd)
+
+#A function to get the pwm for logomaker()
+scale1=function(x){return(x/sum(x))}
+pwm = function(pfm,bg=0.25){
+  pfm=as.matrix(pfm)
+  pseudo=sqrt(dim(pfm)[2])/4
+  pwm=apply((pfm+pseudo),2,scale1)
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:dim(pfm)[2]
+  return(pwm)
+}
+
+# A function to get the sequence motif.
+GetIUPACSequence = function(pwm, prob = 0.25) {
+  iupac.table =
+    c(".", "A", "C", "M", "G", "R", "S", "V", "T", "W", "Y", "H", "K", "D", "B", "N")
+  iupac.value = t((pwm >= prob)) %*% c(1, 2, 4, 8) + 1
+  return(paste(iupac.table[iupac.value], collapse = ""))
+}
+
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+```
+
+###SELEX
+
+This section shows the logo plots of the motifs from HT-SELEX. 
+
+```{r}
+for(i in c(61)){
+  pfm=as.matrix(PFMselex[[i]])
+  print(GetIUPACSequence(pwm(pfm)))
+  logomaker(pwm(pfm),xlab = 'position',color_profile = color_profile,frame_width = 1,
+            pop_name=paste('Logo plot SELEX'))
+  nlogomaker(pwm(pfm),logoheight = 'ic',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, IC'),ylimit = 2.1)
+  nlogomaker(pwm(pfm),logoheight = 'log',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, log'),ylimit = 2.1)
+  nlogomaker(pwm(pfm),logoheight = 'log_odds',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, log-odds'),ylimit = 2.1)
+}
+```
+
+###CHIP-seq
+
+This section shows the logo plots of the motifs from CHIP-seq. 
+
+```{r}
+for(i in c(121)){
+  pfm=as.matrix(PFMchip[[i]])
+  print(GetIUPACSequence(pwm(pfm)))
+  logomaker(pwm(pfm),xlab = 'position',color_profile = color_profile,frame_width = 1,
+            pop_name=paste('Logo plot ChIP-seq'))
+  nlogomaker(pwm(pfm),logoheight = 'ic',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, IC'),ylimit = 2.1)
+  nlogomaker(pwm(pfm),logoheight = 'log',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, log'),ylimit = 2.1)
+  nlogomaker(pwm(pfm),logoheight = 'log_odds',xlab = 'position',color_profile = color_profile,frame_width = 1, pop_name=paste('Neg Logo plot, log-odds'),ylimit = 2.1)
+}
+```
+
+
+In the examples above, there are depletions of bases shown in the negative logo plot. It may be considered that the transcription factor would find both enrichment and depletion to decide whether to bind. For example, in the last plot, the depletion of T at position 7 probably means the TF ‘dislike’ T at that position. So here to understand the mechanism of transcription factor seems vital. Trying to tell whether the transcription factor would bind to a specific site, logo plot may be more straightforward since looking at the core motif would probably enough to answer yes or no. But negative logo plot may help understand how the TF works.
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

@@ -1,0 +1,189 @@
+---
+title: "Cancer Mutation"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+```{r,include=FALSE}
+library(Logolas)
+```
+
+
+Detection of novel mutaiton signatures could provide insights into the causes and mechanism of cancers. Mutation signature describes a characteristic mutational pattern observed in cancer genomes. The simplest case is to consider 6 possible mutation patterns(C to A/G/T, T to A/C/G). Shiraishi *et al.*(2015) proposed a parsimonious approach to model the mutation signatures, by assuming independence across mutation patterns. Here, we use logo plots to visualize the mutaiton signatures(corresponds to the Figure 4 in Shiraishi *et al.*(2015)). 
+
+#Visualization by Logolas
+
+Depletion cases: 26, C at +1; 15,16,25 G at +1
+
+Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
+
+## Information Content Height
+
+
+```{r,echo=FALSE}
+for(i in c(1:27)){
+  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot dash/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
+  mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
+  rownames(mat1)=c('A','C','G','T')
+  colnames(mat1) = c("-2", "-1", "0", "1", "2")
+  mat2=cbind(rep(NA,6),rep(NA,6),t(mat[1,]),rep(NA,6),rep(NA,6))
+  colnames(mat2) = c("-2", "-1", "0", "1", "2")
+  rownames(mat2) = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  table = rbind(mat1, mat2)
+  
+  cols = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 
+'qual',]
+col_vector = unlist(mapply(RColorBrewer::brewer.pal, cols$maxcolors, rownames(cols)))
+total_chars = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "zero", "one", "two",
+"three", "four", "five", "six", "seven", "eight", "nine", "dot", "comma",
+"dash", "colon", "semicolon", "leftarrow", "rightarrow")
+
+  set.seed(20)
+color_profile <- list("type" = "per_symbol",
+"col" = sample(col_vector, length(total_chars), replace=FALSE))
+  
+  # logomaker(table,
+  #          color_profile = color_profile,
+  #          frame_width = 1,
+  #          xlab = "Position",
+  #          ylab = "Information content",
+  #          pop_name=paste('Logo plot',i))
+
+  nlogomaker(table,
+             logoheight = 'ic',
+          color_profile = color_profile,
+          frame_width = 1,
+          xlab = "Position",
+          ylab = "Information content",
+          ylimit = max(colSums(neg_ic_computer(table)$ic_neg))+max(colSums(neg_ic_computer(table)$ic_pos)),
+          pop_name = paste('Neg logo plot',i)
+          )
+  
+}
+
+
+```
+
+## Log-odds Height
+
+```{r,echo=FALSE}
+for(i in c(1:27)){
+  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot dash/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
+  mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
+  rownames(mat1)=c('A','C','G','T')
+  colnames(mat1) = c("-2", "-1", "0", "1", "2")
+  mat2=cbind(rep(NA,6),rep(NA,6),t(mat[1,]),rep(NA,6),rep(NA,6))
+  colnames(mat2) = c("-2", "-1", "0", "1", "2")
+  rownames(mat2) = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  table = rbind(mat1, mat2)
+  
+  cols = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 
+'qual',]
+col_vector = unlist(mapply(RColorBrewer::brewer.pal, cols$maxcolors, rownames(cols)))
+total_chars = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "zero", "one", "two",
+"three", "four", "five", "six", "seven", "eight", "nine", "dot", "comma",
+"dash", "colon", "semicolon", "leftarrow", "rightarrow")
+
+  set.seed(20)
+color_profile <- list("type" = "per_symbol",
+"col" = sample(col_vector, length(total_chars), replace=FALSE))
+  
+  # logomaker(table,
+  #          color_profile = color_profile,
+  #          frame_width = 1,
+  #          xlab = "Position",
+  #          ylab = "Information content",
+  #          pop_name=paste('Logo plot',i))
+
+  nlogomaker(table,
+             logoheight = 'log_odds',
+          color_profile = color_profile,
+          frame_width = 1,
+          xlab = "Position",
+          ylab = "Information content",
+          #ylimit = max(colSums(neg_ic_computer(table)$ic_neg))+max(colSums(neg_ic_computer(table)$ic_pos)),
+          pop_name = paste('Neg logo plot',i)
+          )
+  
+}
+```
+
+## Log Height
+
+```{r,echo=FALSE}
+for(i in c(1:27)){
+ mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot dash/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
+  mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
+  rownames(mat1)=c('A','C','G','T')
+  colnames(mat1) = c("-2", "-1", "0", "1", "2")
+  mat2=cbind(rep(NA,6),rep(NA,6),t(mat[1,]),rep(NA,6),rep(NA,6))
+  colnames(mat2) = c("-2", "-1", "0", "1", "2")
+  rownames(mat2) = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  table = rbind(mat1, mat2)
+  
+  cols = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 
+'qual',]
+col_vector = unlist(mapply(RColorBrewer::brewer.pal, cols$maxcolors, rownames(cols)))
+total_chars = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "zero", "one", "two",
+"three", "four", "five", "six", "seven", "eight", "nine", "dot", "comma",
+"dash", "colon", "semicolon", "leftarrow", "rightarrow")
+
+  set.seed(20)
+color_profile <- list("type" = "per_symbol",
+"col" = sample(col_vector, length(total_chars), replace=FALSE))
+  
+  # logomaker(table,
+  #          color_profile = color_profile,
+  #          frame_width = 1,
+  #          xlab = "Position",
+  #          ylab = "Information content",
+  #          pop_name=paste('Logo plot',i))
+
+  nlogomaker(table,
+             logoheight = 'log',
+          color_profile = color_profile,
+          frame_width = 1,
+          xlab = "Position",
+          ylab = "Information content",
+          #ylimit = max(colSums(neg_ic_computer(table)$ic_neg))+max(colSums(neg_ic_computer(table)$ic_pos)),
+          pop_name = paste('Neg logo plot',i)
+          )
+  
+}
+```
+
+# Reference
+
+Shiraishi, Yuichi, et al. "A simple model-based approach to inferring and visualizing cancer mutation signatures." *PLoS genetics* 11.12 (2015): e1005657.
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

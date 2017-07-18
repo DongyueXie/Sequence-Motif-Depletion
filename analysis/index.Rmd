@@ -1,10 +1,20 @@
 ---
-title: "Home"
+title: "Overview"
 output:
   html_document:
     toc: false
 ---
 
-This project aims to study the depletion of bases in DNA sequence.
+This project aims to study the depletion of bases in DNA sequence and its visualization. Transcription factor binding site is characterized by the DNA sequence motifs. A powerful tool to visualize the motif is logo plot. Usually, the enrichment is highlighted while the depletion is usually overlooked. Here, we introduce negative logo plot, where the depletion is plotted down below the zero on y axis so that we can find both strong positive and negative effects.
 
-Click on this [link](Consensus.html) to see the improvement of IUPAC code.
+These are results of the analysis.
+
+1. [An initial look at the negative logo plot.](neg_logo_plot.html)
+2. [An explorative data analysis.](ColSums_of_PFM.html)
+3. [An analysis of depletion.](Depletion.html)
+4. [More examples of dimer.](dimer.html)
+5. [Dirichlet adaptive shrinkage.](dash.html)
+6. [Cancer Mutation Signature.](mutation.html)
+7. [Consensus sequence.](consensus_seq.html)
+
+All the results here are reproducible. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 

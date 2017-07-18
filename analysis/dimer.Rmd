@@ -1,0 +1,128 @@
+---
+title: "Dimer examples"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+```{r,include=FALSE}
+library(Logolas)
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+myStrSplit <- function(x, split) {
+  ret <- list(seq_along(x))
+  for(i in seq_along(x)) {
+    ret[[i]] <- x[i]
+    for(sp in split) {
+      ret[[i]] <- unlist(strsplit(ret[[i]], sp))
+      ret[[i]] <- ret[[i]][nchar(ret[[i]]) > 0]
+      if(length(ret[[i]]) == 0)
+        break
+    }
+  }
+  return(ret)
+}
+
+
+LoadMotifLibrary <- function(filename, tag = "MOTIF", transpose = FALSE, field = 2, sep = c("\t", " "), skipcols = 0, skiprows = 2, pseudocount = 0) {
+  lines <- readLines(filename)
+  motifLineNums <- grep(tag, lines)
+  if(length(myStrSplit(lines[motifLineNums[1]], sep)[[1]]) >= field) {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  } else {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  }
+  allmats <- as.list(seq_along(motifnames))
+  
+  for(matrixId in seq_along(motifLineNums)) {
+    motifLineNum <- motifLineNums[matrixId] + skiprows
+    if(!transpose) {
+      pwm <- NULL
+      nrows <- 0
+      tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+      tmp <- tmp[nchar(tmp) > 0]
+      while(length(tmp) >= 4 + skipcols) {
+        tmp <- as.numeric(tmp[skipcols + seq(4)])
+        if(sum(is.na(tmp)) == 0) {
+          pwm <- rbind(pwm, tmp)
+        }
+        nrows <- nrows + 1
+        tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+        tmp <- tmp[nchar(tmp) > 0]
+      }
+    } else {
+      nrows <- 4
+      if(skipcols == 0) {
+        pwm <-
+          matrix(as.numeric(unlist(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep))), ncol = 4)
+      } else {
+        pwm <-
+          matrix(as.numeric(unlist(sapply(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep), function(x) x[-seq(skipcols)]))), ncol = 4)
+      }
+    }
+    
+    pwm = t(pwm)
+    #check if the counts of pfm are larger than 20.
+    if (sum(pwm[,1])<20){
+      if(sum(pwm[,1])<=2){
+      pwm <- pwm + pseudocount
+      pwm <- pwm / apply(pwm, 2, sum)
+      rownames(pwm) <- c('A','C','G','T')
+      colnames(pwm) = 1:dim(pwm)[2]
+    }else{pwm=NA}
+    }else{pwm=getpwm(pwm)}
+    allmats[[matrixId]] <- pwm
+  }
+  names(allmats) <- motifnames
+  return(allmats)
+}
+#extract all pwms from encode (from atSNP)
+PWMencode=LoadMotifLibrary("http://compbio.mit.edu/encode-motifs/motifs.txt", tag = ">",transpose = FALSE, field = 1, sep = c("\t", " ", ">"), skipcols = 1, skiprows = 1, pseudocount = 0.001)
+```
+
+Here ,we presents more examples of dimer from the database from atSNP package. The database only contains position probability matrix(from directly scaling of pfm) and the number of counts at each position is unkown. So the findings based on these data may be unreliable. Despite this, we found some TF families that have tipical dimer characteristics.
+
+EBF1 family: G depleted followed by C. (CG); dimer, with depletion in the middle.
+```{r}
+
+for(i in grep('EBF1',names(PWMencode))){
+  nlogomaker(PWMencode[[i]],logoheight = 'ic',color_profile = color_profile,frame_width = 1,ylimit=2.1,pop_name = names(PWMencode[i]))
+}
+```
+
+TFAP2 family: dimer, with depletion in the middle.
+```{r}
+for(i in grep('TFAP2',names(PWMencode))){
+  nlogomaker(PWMencode[[i]],logoheight = 'ic',color_profile = color_profile,frame_width = 1,ylimit=2.1,pop_name = names(PWMencode[i]))
+}
+```
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

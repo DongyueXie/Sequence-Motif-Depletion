@@ -1,0 +1,308 @@
+---
+title: "Depletion"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+```{r,include=FALSE}
+library(JASPAR2014)
+library(TFBSTools)
+library(Logolas)
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+```
+
+We have seen some negative logo plots and depletion exmaples in previous vignettr. Now, We are interested in finding the depletion of one particular base(e.g. (0,1/3,1/3,1/3)) and then study whether the corresponding transcription factors have special functionality. 
+
+For convenience, I call this kind of case as "perfect depletion". Perfect depletion corresponds to $p=(0,\frac{1}{3},\frac{1}{3},\frac{1}{3})$ in position weight matrix(PWM) where 0 is the weight of depleted base. In such case, the information content(IC) is then $(0.415,0,0,0)$, where $0.415$ is the negative IC. With pseudocounts, we would not have the case like $p$. So now suppose the perfect depletion case is $q=(0.01,0.33,0.33,0.33)$, then the IC is $(0.35,0,0,0)$. One simple way to find such cases is to measure the difference between the largest IC on nagative part and the second largest IC on each position. The difference is denoted as $d$. Then if the difference is larger than a threshold $\alpha$, the perfect depletion exists. 
+
+Here, $\alpha$ is chosen empirically. For a database(HOCOMOCO, JASPAR 2014), suppose it has total $m$ PWMs and take the largest $d$ for each PWMs, then we have $m$ differences. Sort the $m$ number descendingly and find the smallest $d$ such that the IUPAC code corresponding to that PWM has either B,D,H or V and after that $d$, there are seldomly such PWMs.(See http://www.bioinformatics.org/sms/iupac.html for the IUPAC code.) Then the value this smallest $d$ is the threshold $\alpha$. The rationale is that in IUPAC code, B means C or G　or T, which actually corresponds to the depletion in A. The same reason holds for D, H and V.
+
+Also, if the sum of counts for each position in pfm is smaller than 20, the corresponding pfm is discarded.(One alternative way is to use *dash*)  
+
+For transcription factor with perfect depletion, we record its name, depleted positions, bases, distances, PWM and the neighbors of depleted bases.
+
+
+```{r,include=FALSE}
+scale1=function(x){return(x/sum(x))}
+#A function to get the PWM given PFM:
+getpwm=function(pfm,bg=0.25){
+  pfm=as.matrix(pfm)
+  pseudo=sqrt(dim(pfm)[2])/4
+  pwm=apply((pfm+pseudo),2,scale1)
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:dim(pfm)[2]
+  return(pwm)
+}
+
+#A function to find the position with perfect depletion
+#If the counts in pfm is smaller than 20, then discard the pfm and set pwm=NA
+getdep=function(pwm){
+  if(sum(is.na(pwm))==1){d=0}else{
+  ic=neg_ic_computer(pwm)
+  maxneg=apply(ic$ic_neg,2,max)
+  max2=apply(rbind(ic$ic_pos,ic$ic_neg),2, function(x) sort(x,T)[2])
+  d=maxneg-max2
+  d[is.na(d)]=0
+  }
+  return(d)
+}
+
+
+# A function to get the sequence motif.
+GetIUPACSequence = function(pwm, prob = 0.25) {
+  iupac.table =
+    c(".", "A", "C", "M", "G", "R", "S", "V", "T", "W", "Y", "H", "K", "D", "B", "N")
+  iupac.value = t((pwm >= prob)) %*% c(1, 2, 4, 8) + 1
+  return(paste(iupac.table[iupac.value], collapse = ""))
+}
+```
+
+```{r,include=FALSE}
+#function to read txt files:
+#Modified from atSNP package
+myStrSplit <- function(x, split) {
+  ret <- list(seq_along(x))
+  for(i in seq_along(x)) {
+    ret[[i]] <- x[i]
+    for(sp in split) {
+      ret[[i]] <- unlist(strsplit(ret[[i]], sp))
+      ret[[i]] <- ret[[i]][nchar(ret[[i]]) > 0]
+      if(length(ret[[i]]) == 0)
+        break
+    }
+  }
+  return(ret)
+}
+
+
+LoadMotifLibrary <- function(filename, tag = "MOTIF", transpose = FALSE, field = 2, sep = c("\t", " "), skipcols = 0, skiprows = 2, pseudocount = 0) {
+  lines <- readLines(filename)
+  motifLineNums <- grep(tag, lines)
+  if(length(myStrSplit(lines[motifLineNums[1]], sep)[[1]]) >= field) {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  } else {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  }
+  allmats <- as.list(seq_along(motifnames))
+  
+  for(matrixId in seq_along(motifLineNums)) {
+    motifLineNum <- motifLineNums[matrixId] + skiprows
+    if(!transpose) {
+      pwm <- NULL
+      nrows <- 0
+      tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+      tmp <- tmp[nchar(tmp) > 0]
+      while(length(tmp) >= 4 + skipcols) {
+        tmp <- as.numeric(tmp[skipcols + seq(4)])
+        if(sum(is.na(tmp)) == 0) {
+          pwm <- rbind(pwm, tmp)
+        }
+        nrows <- nrows + 1
+        tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+        tmp <- tmp[nchar(tmp) > 0]
+      }
+    } else {
+      nrows <- 4
+      if(skipcols == 0) {
+        pwm <-
+          matrix(as.numeric(unlist(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep))), ncol = 4)
+      } else {
+        pwm <-
+          matrix(as.numeric(unlist(sapply(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep), function(x) x[-seq(skipcols)]))), ncol = 4)
+      }
+    }
+    
+    pwm = t(pwm)
+    #check if the counts of pfm are larger than 20.If smaller than 20, set as NA.
+    if (sum(pwm[,1])<20){
+      if(sum(pwm[,1])<=2){
+      pwm <- pwm + pseudocount
+      pwm <- pwm / apply(pwm, 2, sum)
+      rownames(pwm) <- c('A','C','G','T')
+      colnames(pwm) = 1:dim(pwm)[2]
+    }else{pwm=NA}
+    }else{pwm=getpwm(pwm)}
+    allmats[[matrixId]] <- pwm
+  }
+  names(allmats) <- motifnames
+  return(allmats)
+}
+```
+
+```{r,include=FALSE}
+
+#A function that takes PWM list as input and then output depletion positions.
+#'@ alpha: threshhold of perfect depletion
+#'@ pwm: list of PWMs
+depletion=function(pwm,alpha=0.1077487){
+  scores=lapply(pwm,getdep)
+  cc=c('A','C','G','T')
+  dlist=list()
+  for (i in 1:length(pwm)){
+    if (sum(scores[[i]]>=alpha)!=0){
+      position=which(scores[[i]]>=alpha)
+      npos=dim(pwm[[i]])[2]
+      value=scores[[i]][position]
+      mat=pwm[[i]]
+      base=cc[apply(cbind(mat[,position]),2,which.min)]
+      nbrleft1=substring(GetIUPACSequence(pwm[[i]]),
+                         position-1,position-1)
+      nbrright1=substring(GetIUPACSequence(pwm[[i]]),
+                          position+1,position+1)
+      name=names(pwm[i])
+      ID=i
+      sublist=list(ID=ID,position=position,npos=npos,base=base,value=value,
+                   mat=mat,nbrleft1=nbrleft1,nbrright1=nbrright1)
+      dlist[[name]]=sublist
+    }
+  }
+  return(dlist)
+}
+
+```
+
+```{r,warning=FALSE,include=FALSE}
+#extract all pwms from JASPAR 2014
+opts = list()
+PFMlist = getMatrixSet(JASPAR2014,opts)
+
+PWMJaspar=lapply(PFMlist,function(x) if(sum(as.matrix(x)[,1])>=20){getpwm(x)}else{NA})
+
+#extract all pwms from HOCOMOCO
+PWMHuman=LoadMotifLibrary('http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_jaspar_format.txt',tag='>',field = 1,sep = c("\t", " ", ">"), transpose = T,skipcols = 0, skiprows = 1)
+PWMMouse=LoadMotifLibrary('http://hocomoco.autosome.ru/final_bundle/MOUSE/mono/HOCOMOCOv10_MOUSE_mono_jaspar_format.txt',tag='>',field = 1,sep = c("\t", " ", ">"), transpose = T,skipcols = 0, skiprows = 1)
+```
+
+```{r,include=FALSE}
+# Choose alpha:
+# get the largest d for each pwm
+scJaspar=lapply(lapply(PWMJaspar,getdep),max)
+scHuman=lapply(lapply(PWMHuman,getdep),max)
+scMouse=lapply(lapply(PWMMouse,getdep),max)
+# A function to get the alpha:
+#'@ sc: a list contains the largest d for each pwm for a database.
+#'@ top: the (top)th largest d.
+#'@ pwm: a pwm list
+findalpha=function(sc,top,pwm){
+  s=sort(as.numeric(sc),decreasing = T)[1:top]
+  sumiu=c()
+  for (i in 1:length(s)){
+  id=as.numeric(sc)==s[i]
+  id=which(id==T)
+  #print(sc[id])
+  #print(names(sc[id]))
+  seqq=(GetIUPACSequence(pwm[[grep(names(sc[id]),names(pwm))]]))
+  #print(seqq)
+  #find the optimal d
+  #by checking if there is any BDHV in IUPAC sequence.
+  iupac=c()
+  for(j in 1:nchar(seqq)){
+    sb=substr(seqq,j,j)
+    if(sb=='B'|sb=='D'|sb=='H'|sb=='V'){iupac[j]=1}else{iupac[j]=0}
+  }
+  sumiu[i]=sum(iupac)
+  }
+  topth=which(smooth(sumiu)==0)[1]
+  #return(sumiu)
+  return(s[[topth]])
+}
+
+```
+
+#Analysis
+
+Firstly, we get the depletion list of each database. There are some overlaps of JASPAR 2014 and HOCOMOCO. So here our analysis of depleted TFs focuses on HOCOMOCO database, which consists of Human and Mouse data.
+
+```{r}
+#get the list of perfect depeltion from JASPAR, HOCOMOCO
+DepJaspar=depletion(PWMJaspar,findalpha(scJaspar,50,PWMJaspar))
+DepHuman=depletion(PWMHuman,findalpha(scHuman,50,PWMHuman))
+DepMouse=depletion(PWMMouse,findalpha(scMouse,50,PWMMouse))
+paste('There are',length(DepHuman),'perfect depletion in Human data')
+paste('There are',length(DepMouse),'perfect depletion in Mouse data')
+```
+
+We then analyzed the genes that produce these TFs(with delpetion), by the censusPathDB. The idea is that each TF is produced by a gene and then we test if the gene producing TF with depletion is related to a specific function. It turns out that the depletion is probably not connected with specific functional behavior. See [here](depletion_tfsea.html) for details.
+
+From the analysis of HOCOMOCO plots, we found that two TF families are of interests - SOX and IRF, the reason is that there are several Trancription factor with perfect delpeltion, namely SOX17, SOX3 and IRF3,IRF4,IRF8. Below are the logo plots of Mouse IRF family.
+
+```{r}
+for (i in grep('IRF',names(PWMMouse))){
+  if(sum(is.na(PWMMouse[[i]]))==0){
+    print(GetIUPACSequence(PWMMouse[[i]]))
+  nlogomaker(PWMMouse[[i]],logoheight = 'ic',color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]),ylimit=2.1)
+}}
+```
+
+One kind of plots that are of particular interests is the dimer. For example, the logo plots of IRF families are dimers, with depletion in the middle and enrichment in the two sides. We found that dimer is common and usually has the characteristic that depletion gap is between two palindromic sequences(or same sequence like IRF, not common). For example, TGGGG__CCCCA. 
+
+#Depletion frequncies
+
+This section presents the delpletion frequency for A,G,C,T at different postions. For each base, in the PWM of a transcription factor, suppose the depletion occurs at the $n_{base}^{th}$ postion and the total number of postion is $n$. Then we measure the relative distance of postion to the center as: $d=|\frac{n_{base}}{n}-0.5|$. If d is close to 0.5, then the depletion position is close to the end. If d is close to 0, then the delpetion position is close to the center.
+
+```{r,echo=FALSE}
+
+depall=c(DepJaspar,DepHuman,DepMouse)
+l=length(depall)
+dep=c()
+for (i in 1:l){
+  len=length(depall[[i]]$base)
+  if(len==1){
+    b=c(depall[[i]]$base,depall[[i]]$position,depall[[i]]$npos)
+  }else{
+    b=c()
+      for(j in 1:len){
+        b=rbind(b,c(depall[[i]]$base[j],depall[[i]]$position[j],depall[[i]]$npos))
+      }
+    }
+  dep=rbind(dep,b)
+}
+colnames(dep)=c('base','pos','npos')
+rownames(dep)=NULL
+dep=as.data.frame(dep)
+dep$pos=as.numeric(levels(dep$pos))[dep$pos]
+dep$npos=as.numeric(levels(dep$npos))[dep$npos]
+dep$per=abs(dep$pos/dep$npos-0.5)
+depT=dep[dep$base=='T',]
+depA=dep[dep$base=='A',]
+depG=dep[dep$base=='G',]
+depC=dep[dep$base=='C',]
+plot(density(c(depA$per,-depA$per,1-depA$per),adjust=0.5),xlim = c(0,0.5),xlab='Relative position(Center to End)',ylab='Depletion frequency',main='Depletion frequency at different positions, base A')
+plot(density(c(depC$per,-depC$per,1-depC$per),adjust=0.5),xlim = c(0,0.5),xlab='Relative position(Center to End)',ylab='Depletion frequency',main='Depletion frequency at different positions, base C')
+plot(density(c(depG$per,-depG$per,1-depG$per),adjust=0.5),xlim = c(0,0.5),xlab='Relative position(Center to End)',ylab='Depletion frequency',main='Depletion frequency at different positions, base G')
+plot(density(c(depT$per,-depT$per,1-depT$per),adjust=0.5),xlim = c(0,0.5),xlab='Relative position(Center to End)',ylab='Depletion frequency',main='Depletion frequency at different positions, base T')
+
+```
+
+From the histograms, there are more depletion at the ends than that at the center for the bases.
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

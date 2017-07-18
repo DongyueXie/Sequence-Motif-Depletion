@@ -1,0 +1,37 @@
+---
+title: "Dirichlet Adaptive Shrinkage"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+Dirichlet adaptive shrinkage, dash, performs Bayesian adaptive shrinkage to produce refined probabilities for compositional data.  Assume the counts of A,C,G,T in one position follows multinomial distribution: $(n_A,n_C,n_G,n_T)\sim multinom(n,p_A,p_C,p_G,p_T)$, where $n=n_A+n_C+n_G+n_T, p_A+p_C+p_G+p_T=1$  and the probability vector follows a mixture of Dirichlet distributions: $p=(p_A,p_C,p_G,p_T)\sim \Sigma_{k=1}^K\pi_k*Dirichlet(\alpha_k,...,\alpha_k)$. The component Dirichlet distributions in the mixture have varying degrees of concentration, from infinity to less than 1. Inf corresponds to a point mass on the mode. Here, the $\alpha_k,k=1,...,K$ are chosen to be $Inf,100, 50, 20, 10, 5, 2, 1, 0.5, 0.1.$. To make the model have shrinkage effect, the prior of $\pi_k,k=1,...,K$ is proportional to $(10,1,1,1,1,1,1,1,1,1)$. Then posterior mean of $p$ is the estimator. For example, $\hat p_A=\Sigma_{k=1}^K\hat\pi_k*\hat p_{Ak}$, where $\hat p_{Ak}$ is the posterior mean of $p_A$ of each Dirichlet component. Hence, $$\hat p_A=\Sigma_{k=1}^K\hat\pi_k*[(\frac{n_A}{n}*\frac{n}{n+4\alpha_k})+\frac{\alpha_k}{4\alpha_k}*\frac{4\alpha_k}{n+4\alpha_k}]$$
+$$=\frac{n_A}{n}\Sigma_{k=1}^K\hat\pi_k\frac{n}{n+4\alpha_k}+\frac{1}{4}\Sigma_{k=1}^K\hat\pi_k\frac{4\alpha_k}{n+4\alpha_k} .$$
+Obviously, the $\hat p_A$ is the weighted average of prior mean and the observed value. When $n\to \infty$, $\hat p_A\to \frac{n_A}{n} $; $n\to 0$, $\hat p_A\to \frac{1}{4}$. When $\alpha_k\to\infty, \hat\pi_k\to1$, $\hat p_A\to \frac{1}{4}$; $\alpha_k\to0, \hat\pi_k\to1$, $\hat p_A\to \frac{n_A}{n}$.
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

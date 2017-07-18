@@ -1,0 +1,523 @@
+---
+title: "Consensus Sequence"
+author: "Dongyue Xie"
+date: 2017-07-17
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+The original IUPAC code is gotten in the way that one finds the bases that has larger frequency than the background probability(default $0.25$), then corresponds them to the IUPAC code table. There are some problems with this method. Firstly, if the frequencies of $A,C,G,T$ at a position are $(0.28,0.24,0.24,0.24)$, then the code would be A for the position. However, it seems that an N is more appropriate which means any base. Secondly, if the frequencies are $(0.35,0.35,0.24,0.06)$, then the code would be $M(A$ or $C)$ for the position. But a depletion in $T$ may be a better representation. Also, to use $(AC)$ representing $A$ or $C$ is more straightforward than introducing extra letters. 
+
+We studied three possible methods that could improve the IUPAC nucleotide code so that the code could give more information about the enrichment and depletion of bases.
+
+#Method 1
+
+We first divide all possible frequencies into the following categories:
+
+1. Enrichment in one base,  denoted by the base name.
+2. Enrichments in two bases, denote by the two base names with a bracket. The first one has larger frequency.
+3. Depletion in one base, denoted by the base name but in lowercase.
+4. Depletion in one base and an enrichment in another, denoted by the base names(case sensitive) with bracket.
+5. Any base, denoted by 'N'
+
+Then define five vectors whose length is 4 and the elements sum to 1. The vectors correspond to the categories above.
+
+1. $V_1$ : One large elements and the others are small, e.g: $(1,0,0,0)$, $(0.7,0.1,0.1,0.1)$
+2. $V_2$ : Two large elements and the others are small, e.g: $(0.5,0.5,0,0)$, $(0.45,0.45,0.05,0.05)$
+3. $V_3$ : One relatively small elements, e.g:$(1/3,1/3,1/3,0)$
+4. $V_4$ : One large and one small elements, e.g: $(0.7,0.15,0.15,0)$
+5. $V_5$ : Equal elements, (0.25,0.25,0.25,0.25)
+
+We sort the base frequencies at a position descendingly and then get the distance between the sorted frequencies and the five vectors defined above. Then we could know the base frequency vector belongs to the category that minimizes the distance. So according to the distances, we could determine which category the position belongs to and then assign the corresponding code.
+
+The problem then could be formed in a decision theory problem. The action space is $S=\{V_1,V_2,V_3,V_4,V_5\}$. The action to be taken is $s\in S$. The loss function is the distance function, e.g. Jensen–Shannon divergence, $L(p,s)=0.5D_{KL}(p||m)+0.5D_{KL}(s||m)$, where $m=(p+s)/2$ and $D_{KL}(p||q)=\Sigma_ip_i\log(p_i/q_i)$. A pseudocount $w=0.001$ is added if any of the probability is 0 and then the probability vector is rescaled.
+
+There are two types of distance function. The first type is the measure of the distance between two discrete distributions. For example, Kullback-Leibler divergence, Jensenā-Shannon divergence, Bhattacharyya distance. The second type is the vector norm. For example, $L^1$ norm ,$L^2$ norm, infinity norm.
+
+So for each different choice of $V_1,V_2,V_3,V_4,V_5$ and distance function, we would have one code for the sequence. So in total, there are $n_{v_1}*n_{v_2}*n_{v_3}*n_{v_4}*n_{v_5}*n_{dis}$ codes. To make the result robust to these choices, we take the mode of the code at the each position. And if there are two codes that happen more than $40\%$ of the time, we report both. For example, $A$ happens 3 times and $At$ happens 4 times out of total 7 times, then the code is given by $[A-At]$
+
+#Method 2
+
+The five categories are the same as above. 
+
+Define three kinds of vectors whose length is 3 and the elements sum to 1:
+
+1. $V_1$ : One large elements and the others are small, e.g: $(1,0,0)$, $(0.8,0.1,0.1)$
+2. $V_2$ : Two large elements and the other one is small, e.g: $(0.5,0.5,0)$, $(0.45,0.45,0.1)$
+3. $V_3$ : Equally large elements, e.g:$(1/3,1/3,1/3)$
+
+We sort the base frequencies at a position descendingly and divide it into two parts, the largest three and the smallest three(both are ordred descendingly), then get the distance between the each part(scaled, sum to 1) and the three kinds of vectors defined above. For example, $(1,0,0)$, $(0.5,0.5,0)$, $(1/3,1/3,1/3)$. For the $N$ case, both of the two parts should have smallest diatance to $(1/3,1/3,1/3)$. And the for the "one enrichment" case, the largest three should have the smallest distance to $(1,0,0)$, etc. So according to the distances, we could determine which category the position belongs to and then assign the corresponding code. I take $A$ and $T$ as examples to illuastrate the results. If the largest three is closest to $(1,0,0)$ and the smallest three is closest to $(1/3,1/3,1/3)$, then the code should be $A$. In the following table, I denote the case as "$(1,0,0),(0.5,0.5,0) - A$". Below are examples of different combinations:
+
+1. $(1,0,0),(1,0,0) - A$
+2. $(1,0,0),(0.5,0.5,0) - At$
+3. $(1,0,0),(1/3,1/3,1/3) - A$
+4. $(0.5,0.5,0),(1,0,0) - AT$
+5. $(0.5,0.5,0),(0.5,0.5,0) - t$
+6. $(0.5,0.5,0),(1/3,1/3,1/3) - AT$
+7. $(1/3,1/3,1/3),(1,0,0) - AT$
+8. $(1/3,1/3,1/3),(0.5,0.5,0) - t$
+9. $(1/3,1/3,1/3),(1/3,1/3,1/3) - N$  
+
+Note that the cases 1,5,6,7 may not be straightforward to understand. Here are some brief explanations. Case 1: the largest one is much larger than the others. Case 5: the first three are larger than the last one. Case 6,7: the first two are larger than the last two. Further, $(0.9,0.05,0.05,0)$ would be classified as case 2 however we want it to be case 1. To avoid this, we require that the difference between the smallest and the second smallest should be at least 0.12. 
+
+Similarly, for each different choice of $V_1,V_2,V_3$ and distance function, we would have one code for the sequence. So in total, there are $n_{v_1}*n_{v_2}*n_{v_3}*n_{dis}$ codes. We also take the mode of the code at the each position as in method 1. 
+
+#Method 3
+
+This method usus the height of the negative logo plot, in which the log height is determined by log odds. Still, we have five categories as above and below lists the way we determine the category of a probability vector:
+
+1. Enrichment in one base: Only one positive logo height is larger than a threshold, $a$ and no negative logo height is larger than a threshold, $c$.
+2. Enrichments in two bases: Two positive logo heights are larger than a threshold, $b$.
+3. Depletion in one base: Positive logo heights do not satisfy either 1 or 2; One negative logo height is larger than $c$.
+4. Depletion in one base and an enrichment in another:Only one positive logo height is larger than $a$ and one negative logo height is larger than $c$.
+5. Any base: otherwise.
+
+Heuristicly, we chose $a=0.25,b=0.12,c=0.14$
+
+##Examples
+
+In the implementation, for method 1, we chose $V_1=(1,0,0,0),(0.85,0.05,0.05,0.05),(0.7,0.1,0.1,0.1)$, $V_2=(0.5,0.5,0,0),(0.45,0.45,0.05,0.05)$, 
+$V_3=(1/3,1/3,1/3,0),(0.3,0.3,0.3,0.1)$,
+$V_4=(0.8,0.1,0.1,0),(0.7,0.15,0.15,0),(0.6,0.2,0.2,0)$,
+$V_5=(0.25,0.25,0.25,0.25)$;
+
+for method 2, we chose $V_1=(1,0,0),(0.9,0.05,0.05),(0.85,0.075,0.075),(0.8,0.1,0.1),(0.75,0.125,0.125),(0.7,0.15,0.15)$, $V_2=(0.5,0.5,0),(0.475,0.475,0.05),(0.45,0.45,0.1)$, $V_3=(1/3,1/3,1/3)$. 
+
+The distance functions are symmetric Kullback-Leibler divergence, Jensenā-Shannon divergence, Bhattacharyya distance, $L^1$ norm, $L^2$ norm, infinity norm. 
+
+Then we apply the code to the depletion data we are interested in(mainly dimer ) and compare them with the IUPAC code from atSNP package.
+
+```{r,include=FALSE}
+library(JASPAR2014)
+library(TFBSTools)
+library(Logolas)
+```
+
+```{r,echo=FALSE}
+# a function scale the vector to be in (0,1)
+scale1=function(x){return(x/sum(x))}
+
+# a function to get the symmetric kl divergence 
+sym_KL=function(p,q){
+  if(sum(p==0)!=0){p=scale1(p+0.001)}
+  if(sum(q==0)!=0){q=scale1(q+0.001)}
+  return(mean(c(sum(p*log(p/q,2)),sum(q*log(q/p,2)))))
+}
+
+# Bhattacharyya distance
+Bdist=function(p,q){
+  if(sum(p==0)!=0){p=scale1(p+0.001)}
+  if(sum(q==0)!=0){q=scale1(q+0.001)}
+  return(-log(sum(sqrt(p*q))))
+}
+
+# Jensenâ-Shannon divergence
+JSdist=function(p,q){
+  if(sum(p==0)!=0){p=scale1(p+0.001)}
+  if(sum(q==0)!=0){q=scale1(q+0.001)}
+  m=(p+q)/2
+  return(sum(p*log(p/m,2))/2+sum(q*log(q/m,2))/2)
+}
+
+#Euclidean distance
+norm2=function(p,q){
+  return(sqrt(sum((p-q)^2)))
+}
+
+#$L^1$ norm distance
+norm1=function(p,q){return(sum(abs(p-q)))}
+
+#inf norm
+norminf=function(p,q){return(max(abs(p-q)))}
+
+
+#mode for a charactor
+Mode <- function(x) {
+  ux <- unique(x)
+  #if(max(tabulate(match(x, ux)))/length(x)>=0.6){re=(ux[which.max(tabulate(match(x, ux)))])}
+  if(sum(tabulate(match(x, ux))/length(x)>=0.4)==2){re=ux[which(tabulate(match(x, ux))>=(length(x)*0.4))]}else{
+   #re=(ux[which.max(tabulate(match(x, ux)))])
+   re=ux[which(tabulate(match(x, ux))==max(tabulate(match(x, ux))))] 
+  }
+  return(re)
+}
+
+cmode=function(vec){
+   if(length(Mode(vec))==1){return(Mode(vec))}else{
+    return(paste('[',paste(Mode(vec),collapse = '/'),']',sep = ''))
+  }
+}
+
+#Method 1:
+# a function to get the code for each position
+# bases=A,G,C,T
+code_pos=function(f,bases,disfunc,rich,richdep,two,dep){
+  #depleion code in lower case
+  based=tolower(bases)
+  # different situations
+  N=rep(0.25,4)
+  mat=cbind(N,rich,two,dep,richdep)
+  if(disfunc=='KL'){func=sym_KL}
+  if(disfunc=='JS'){func=JSdist}
+  if(disfunc=='Bdis'){func=Bdist}
+  if(disfunc=='onenorm'){func=norm1}
+  if(disfunc=='twonorm'){func=norm2}
+  if(disfunc=='infnorm'){func=norminf}
+  # get the distance of the f with each possbile situation above
+  dis=apply(mat,2,func,q=sort(f,decreasing = T))
+  # find which situation it belongs to
+  case=which.min(dis)
+  dif34=sort(f,decreasing = T)[3]-sort(f,decreasing = T)[4]
+  # allocate the code accordingly
+  if(case==1){cd='N'}
+  if(case==2|(case==5&dif34<0.12)){cd=bases[which.max(f)]}
+  if(case==3|(case==4&dif34<0.12)){cd=paste('(',bases[sort(f,index.return=T,decreasing = T)$ix[1]],
+                       bases[sort(f,index.return=T,decreasing = T)$ix[2]],')',sep = '')}
+  if(case==4&dif34>=0.12){cd=based[which.min(f)]}
+  if(case==5&dif34>=0.12){cd=paste('(',bases[which.max(f)],based[which.min(f)],')',sep = '')}
+  return(cd)
+}
+
+# a function to get the code for a motif, for each specific function and prob vecor.
+motifcode=function(pwm,disfunc,rich,richdep,two,dep,sep=TRUE){
+  if(length(rownames(pwm))!=4){bases=c('A','C','G','T')}else{bases=rownames(pwm)}
+  if(sep){
+    return(apply(pwm,2,code_pos,bases=bases,disfunc=disfunc,rich=rich,two=two,richdep=richdep,dep=dep))
+  }else{
+    return(paste(apply(pwm,2,code_pos,bases=bases,disfunc=disfunc,rich=rich,two=two,richdep=richdep,dep=dep),collapse = ''))
+  }
+}
+
+#code from mode (disfunc,prob vector)
+Getmotif1=function(pwm){
+   results=c()
+   ff='ave_code'
+ for(rich in list(c(1,0,0,0),c(0.85,0.05,0.05,0.05),c(0.7,0.1,0.1,0.1))){
+   for(two in list(c(0.5,0.5,0,0),c(0.45,0.45,0.05,0.05))){
+     for (richdep in list(c(0.8,0.1,0.1,0),c(0.7,0.15,0.15,0),c(0.6,0.2,0.2,0))){
+       for (dep in list(c(1/3,1/3,1/3,0),c(0.3,0.3,0.3,0.1))){
+         for (ff in c('KL','JS','Bdis','onenorm','twonorm','infnorm')){
+          results=rbind(results,motifcode(pwm,ff,rich,richdep,two,dep))  
+         }
+       }
+     }
+   }
+ }
+ return(paste(apply(results,2,cmode),collapse = ''))
+ }
+
+#method 2
+
+code_pos2=function(f,bases,disfunc,one,two){
+  based=tolower(bases)
+  three=c(1/3,1/3,1/3)
+  mat=cbind(one,two,three)
+  #get the top three and the bottom three
+  top3=sort(f,decreasing = T)[-4]
+  bot3=sort(f,decreasing = T)[-1]
+  #check the dist of top3&bottom3 with one two three
+  if(disfunc=='KL'){func=sym_KL}
+  if(disfunc=='JS'){func=JSdist}
+  if(disfunc=='Bdis'){func=Bdist}
+  if(disfunc=='onenorm'){func=norm1}
+  if(disfunc=='twonorm'){func=norm2}
+  if(disfunc=='infnorm'){func=norminf}
+  dis_top=apply(mat,2,func,q=scale1(top3))
+  dis_bot=apply(mat,2,func,q=scale1(bot3))
+  #find the which case it belongs to
+  case=factor(which.min(dis_top)):factor(which.min(dis_bot))
+  
+  #check the difference between smallest one &second smallest one.
+  dif34=sort(f,decreasing = T)[3]-sort(f,decreasing = T)[4]
+  
+  #assign code
+  if(case=='1:1'|case=='1:3'|(case=='1:2' & dif34<0.12)){cd=bases[which.max(f)]}
+  if(case=='1:2' & dif34>=0.12){cd=paste('(',bases[which.max(f)],based[which.min(f)],')',sep = '')}
+  if(case=='2:1'|case=='2:3'|case=='3:1'|(case=='3:2' & dif34<0.12)){cd=paste('(',bases[sort(f,index.return=T,decreasing = T)$ix[1]],bases[sort(f,index.return=T,decreasing = T)$ix[2]],')',sep = '')}
+  if((case=='3:2' & dif34>=0.12)|case=='2:2'){cd=based[which.min(f)]}
+  if(case=='3:3'){cd='N'}
+  return(cd)
+}
+
+
+# a function to get the code for a motif
+motifcode2=function(pwm,disfunc,one,two,sep=TRUE){
+  if(length(rownames(pwm))!=4){bases=c('A','C','G','T')}else{bases=rownames(pwm)}
+  if(sep){
+    return(apply(pwm,2,code_pos2,bases=bases,disfunc=disfunc,one=one,two=two))
+  }else{
+    return(paste(apply(pwm,2,code_pos2,bases=bases,disfunc=disfunc,one=one,two=two),collapse = ''))
+  }
+  }
+
+ 
+ # a function that take the mode of the code over differetn choices of one and two prob vectors.
+ Getmotif2=function(pwm){
+   results=c()
+ for(one in list(c(1,0,0),c(0.9,0.05,0.05),c(0.85,0.075,0.075),c(0.8,0.1,0.1),c(0.75,0.125,0.125),c(0.7,0.15,0.15))){
+   for(two in list(c(0.5,0.5,0),c(0.475,0.475,0.05),c(0.45,0.45,0.1),c(0.4,0.4,0.2))){
+     for (ff in c('KL','JS','Bdis','onenorm','twonorm','infnorm')){
+      results=rbind(results,motifcode2(pwm,ff,one,two)) 
+     }
+   }
+ }
+   
+ return(paste(apply(results,2,cmode),collapse = ''))
+ }
+ 
+ #method 3
+ 
+ #enrichment: only one larger than 0.25---A; two larger than 0.1---AT; other wise--
+#delpeltion: larger than 0.14. 
+Getmotif3=function(pwm,bases=c('A','C','G','T')){
+  based=tolower(bases)
+  #pwm_dec=apply(pwm,2,sort,decreasing=TRUE)
+  ll=get_logo_heights_log_odds(pwm,depletion_weight = 0)
+  pp=c();for (i in 1:ncol(pwm)){pp=cbind(pp,ll$pos_ic[i]*ll$table_mat_pos_norm[,i])};
+  nn=c();for(i in 1:ncol(pwm)){nn=cbind(nn,ll$neg_ic[i]*ll$table_mat_neg_norm[,i])};
+  codes=c()
+  
+  for(i in 1:ncol(pwm)){
+    #check if there are two emrichments
+    if(sum(pp[,i]>=0.12)==2){
+      code=paste('(',bases[sort(pwm[,i],index.return=T,decreasing = T)$ix[1]],bases[sort(pwm[,i],index.return=T,decreasing = T)$ix[2]],')',sep = '')
+    }else if(sum(pp[,i]>=0.25)==1){
+      if(sum(nn[,i]>=0.14)==1){
+        code=paste('(',bases[which.max(pwm[,i])],based[which.min(pwm[,i])],')',sep = '')
+      }else{code=bases[which.max(pwm[,i])]}
+    }else{
+      if(sum(nn[,i]>=0.14)==1){
+        code=based[which.min(pwm[,i])]
+      }else{code='N'}
+    }
+    codes[i]=code
+  }
+return(paste(codes,collapse = ''))
+}
+ 
+```
+
+```{r,echo=FALSE}
+#A function to get the PWM given PFM:
+getpwm=function(pfm,bg=0.25){
+  pfm=as.matrix(pfm)
+  pseudo=sqrt(dim(pfm)[2])/4
+  pwm=apply((pfm+pseudo),2,scale1)
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:dim(pfm)[2]
+  return(pwm)
+}
+  
+#A function to find the position with perfect depletion
+#If the counts in pfm is smaller than 20, then discard the pfm and set pwm=NA
+getdep=function(pwm){
+  if(sum(is.na(pwm))==1){d=0}else{
+  ic=neg_ic_computer(pwm)
+  maxneg=apply(ic$ic_neg,2,max)
+  max2=apply(rbind(ic$ic_pos,ic$ic_neg),2, function(x) sort(x,T)[2])
+  d=maxneg-max2
+  d[is.na(d)]=0
+  }
+  return(d)
+}
+
+# A function to get the sequence motif.
+GetIUPACSequence = function(pwm, prob = 0.25) {
+  iupac.table =
+    c(".", "A", "C", "M", "G", "R", "S", "V", "T", "W", "Y", "H", "K", "D", "B", "N")
+  iupac.value = t((pwm >= prob)) %*% c(1, 2, 4, 8) + 1
+  return(paste(iupac.table[iupac.value], collapse = ""))
+}
+
+#function to read txt files:
+#functions to read the data from ENCODE, http://compbio.mit.edu/encode-motifs/motifs.txt
+#Modified from atSNP package
+myStrSplit <- function(x, split) {
+  ret <- list(seq_along(x))
+  for(i in seq_along(x)) {
+    ret[[i]] <- x[i]
+    for(sp in split) {
+      ret[[i]] <- unlist(strsplit(ret[[i]], sp))
+      ret[[i]] <- ret[[i]][nchar(ret[[i]]) > 0]
+      if(length(ret[[i]]) == 0)
+        break
+    }
+  }
+  return(ret)
+}
+
+
+LoadMotifLibrary <- function(filename, tag = "MOTIF", transpose = FALSE, field = 2, sep = c("\t", " "), skipcols = 0, skiprows = 2, pseudocount = 0) {
+  lines <- readLines(filename)
+  motifLineNums <- grep(tag, lines)
+  if(length(myStrSplit(lines[motifLineNums[1]], sep)[[1]]) >= field) {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  } else {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  }
+  allmats <- as.list(seq_along(motifnames))
+  
+  for(matrixId in seq_along(motifLineNums)) {
+    motifLineNum <- motifLineNums[matrixId] + skiprows
+    if(!transpose) {
+      pwm <- NULL
+      nrows <- 0
+      tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+      tmp <- tmp[nchar(tmp) > 0]
+      while(length(tmp) >= 4 + skipcols) {
+        tmp <- as.numeric(tmp[skipcols + seq(4)])
+        if(sum(is.na(tmp)) == 0) {
+          pwm <- rbind(pwm, tmp)
+        }
+        nrows <- nrows + 1
+        tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+        tmp <- tmp[nchar(tmp) > 0]
+      }
+    } else {
+      nrows <- 4
+      if(skipcols == 0) {
+        pwm <-
+          matrix(as.numeric(unlist(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep))), ncol = 4)
+      } else {
+        pwm <-
+          matrix(as.numeric(unlist(sapply(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep), function(x) x[-seq(skipcols)]))), ncol = 4)
+      }
+    }
+    
+    pwm = t(pwm)
+    #check if the counts of pfm are larger than 20.If smaller than 20, set as NA.
+    if (sum(pwm[,1])<20){
+      if(sum(pwm[,1])<=2){
+      pwm <- pwm + pseudocount
+      pwm <- pwm / apply(pwm, 2, sum)
+      rownames(pwm) <- c('A','C','G','T')
+      colnames(pwm) = 1:dim(pwm)[2]
+    }else{pwm=NA}
+    }else{pwm=getpwm(pwm)}
+    allmats[[matrixId]] <- pwm
+  }
+  names(allmats) <- motifnames
+  return(allmats)
+}
+
+#A function that takes PWM list as input and then output depletion positions.
+#'@ alpha: threshhold of perfect depletion
+#'@ pwm: list of PWMs
+depletion=function(pwm,alpha=0.1077487){
+  scores=lapply(pwm,getdep)
+  cc=c('A','C','G','T')
+  dlist=list()
+  for (i in 1:length(pwm)){
+    if (sum(scores[[i]]>=alpha)!=0){
+      position=which(scores[[i]]>=alpha)
+      npos=dim(pwm[[i]])[2]
+      value=scores[[i]][position]
+      mat=pwm[[i]]
+      base=cc[apply(cbind(mat[,position]),2,which.min)]
+      nbrleft1=substring(GetIUPACSequence(pwm[[i]]),
+                         position-1,position-1)
+      nbrright1=substring(GetIUPACSequence(pwm[[i]]),
+                          position+1,position+1)
+      name=names(pwm[i])
+      ID=i
+      sublist=list(ID=ID,position=position,npos=npos,base=base,value=value,
+                   mat=mat,nbrleft1=nbrleft1,nbrright1=nbrright1)
+      dlist[[name]]=sublist
+    }
+  }
+  return(dlist)
+}
+```
+
+```{r,warning=FALSE,echo=FALSE}
+#extract all pwms from JASPAR 2014
+opts = list()
+PFMlist = getMatrixSet(JASPAR2014,opts)
+#length(PFMlist)
+PWMJaspar=lapply(PFMlist,function(x) if(sum(as.matrix(x)[,1])>=20){getpwm(x)}else{NA})
+
+#extract all pwms from encode (from atSNP)
+PWMencode=LoadMotifLibrary("http://compbio.mit.edu/encode-motifs/motifs.txt", tag = ">",transpose = FALSE, field = 1, sep = c("\t", " ", ">"), skipcols = 1, skiprows = 1, pseudocount = 0.001)
+
+#extract all pwms from HOCOMOCO
+PWMHuman=LoadMotifLibrary('http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_jaspar_format.txt',tag='>',field = 1,sep = c("\t", " ", ">"), transpose = T,skipcols = 0, skiprows = 1)
+PWMMouse=LoadMotifLibrary('http://hocomoco.autosome.ru/final_bundle/MOUSE/mono/HOCOMOCOv10_MOUSE_mono_jaspar_format.txt',tag='>',field = 1,sep = c("\t", " ", ">"), transpose = T,skipcols = 0, skiprows = 1)
+
+DepJaspar=depletion(PWMJaspar,alpha = 0.2)
+DepEncode=depletion(PWMencode)
+DepHuman=depletion(PWMHuman)
+DepMouse=depletion(PWMMouse)
+```
+
+
+
+Dimer from IRF family, mouse.
+
+The IUPAC code is given firstly followed by method1, method2, method3 and the PWM.
+```{r}
+for(i in c(11,12,13)){
+  print(GetIUPACSequence(DepMouse[[i]]$mat))
+  print(Getmotif1(DepMouse[[i]]$mat))
+  print(Getmotif2(DepMouse[[i]]$mat))
+  print(Getmotif3(DepMouse[[i]]$mat))
+  print(DepMouse[[i]]$mat)
+  print('-----------------------------------')
+  
+}
+```
+
+Dimer from SOX family, mouse.
+
+```{r}
+for(i in c(27,28)){
+  print(GetIUPACSequence(DepMouse[[i]]$mat))
+  print(Getmotif1(DepMouse[[i]]$mat))
+  print(Getmotif2(DepMouse[[i]]$mat))
+  print(Getmotif3(DepMouse[[i]]$mat))
+  print(DepMouse[[i]]$mat)
+  print('-----------------------------------')
+}
+```
+
+EFB1 family:
+```{r}
+for (i in grep('EBF1',names(DepEncode))){
+print(names(DepEncode[i]))
+print(GetIUPACSequence(DepEncode[[i]]$mat))
+print(Getmotif1(DepEncode[[i]]$mat))
+print(Getmotif2(DepEncode[[i]]$mat))
+print(Getmotif3(DepEncode[[i]]$mat))
+print(DepEncode[[i]]$mat)
+print('------------------------------------------')
+}
+```
+
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
