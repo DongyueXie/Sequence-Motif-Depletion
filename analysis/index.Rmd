@@ -18,3 +18,7 @@ These are results of the analysis.
 7. [Consensus sequence.](consensus_seq.html)
 
 All the results here are reproducible. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 
+
+#Credits
+
+Thanks to [Kushal K Dey](https://github.com/kkdey), [Matthew Stephens](http://stephenslab.uchicago.edu/), [John Blischak](https://github.com/jdblischak), and [	Hussein Al-Asadi](https://halasadi.wordpress.com/) for their great help.
