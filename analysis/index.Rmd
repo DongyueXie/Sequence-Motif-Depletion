@@ -11,14 +11,15 @@ The plots are generated from the R package, Logolas. See [GitHub](https://github
 
 These are results of the analysis.
 
-1. [Negative logo plot for detecting depletion.](neg_logo_plot.html)
-2. [An explorative data analysis.](ColSums_of_PFM.html)
-3. [An analysis of depletion.](Depletion.html)
-4. [More examples of dimer.](dimer.html)
-5. [Dirichlet adaptive shrinkage.](dashkk.html)
-6. [Cancer Mutation Signature.](mutation.html)
-7. [Consensus sequence.](consensus_seq.html)
-8. [Plant Motif.](plant.html)
+1. [Negative logo plot: a new visualization.](neg_logo_plot.html)
+2. [EDA: insight of the data.](ColSums_of_PFM.html)
+3. [Depletion: the oppsite of enrichment.](Depletion.html)
+4. [Dimer: an interesting finding.](dimer.html)
+5. [Dirichlet adaptive shrinkage: small sample size matters.](dashkk.html)
+6. [The power of dash: illustrative examples.][dashex.html]
+7. [Cancer Mutation Signature: a new view.](mutation.html)
+8. [Consensus sequence: an informative way.](consensus_seq.html)
+9. [Plant Motif: dealing with background probability.](plant.html)
 
 All the results here are reproducible. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 
 
