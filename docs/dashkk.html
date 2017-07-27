@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Kushal K Dey" />
+
+
+<title>Dirichlet adaptive shrinkage (dash) for compositional data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Logoplot dash</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Dirichlet adaptive shrinkage (dash) for compositional data</h1>
+<h4 class="author"><em>Kushal K Dey</em></h4>
+<h4 class="date"><em>7/19/2017</em></h4>
+
+</div>
+
+
+<div id="compositional-data" class="section level2">
+<h2>Compositional Data</h2>
+<p>Compositional data is used in statistics to describe parts or constituents of some discrete sample space. A typical example of compositional data is encountered in transcription factor binding sites (TFBS) models in genetics, where data is often reported in positional frequencies of the four bases <span class="math inline">\(A\)</span>, <span class="math inline">\(C\)</span>, <span class="math inline">\(G\)</span> and <span class="math inline">\(T\)</span> in each position of a TF binding site. In this case, knowing the frequency or proportion of <span class="math inline">\(A\)</span> base in a specific position is only informative when viewed relative to the frequency or proportions of the other bases <span class="math inline">\(C\)</span>, <span class="math inline">\(G\)</span> and <span class="math inline">\(T\)</span>. This is a typical characteristic of compositional data. Other examples of such data are protein sequence data where each position in a protein sequence is a composition of 20 amino acids.</p>
+</div>
+<div id="shrinkage-in-compositional-data" class="section level2">
+<h2>Shrinkage in compositional data</h2>
+<p>Why is shrinkage important in the context of compositional data for the TFBS ? Suppose a compositional data at a frequency level for a specific site of a TFBS is</p>
+<p><span class="math display">\[  (A, C, G, T)  : = (6, 1, 2, 1)  \]</span></p>
+<p>and in another case it is</p>
+<p><span class="math display">\[  (A, C, G, T) : = (600, 100, 200, 100)  \]</span></p>
+<p>Usually the background probability for the site is assumed to be equal or close to equal for the four bases. Now the PWM data of estimated proportions of A, C, G and T is the same in both the above scenarios. However, in the second case, we have drawn the proportion estimates from 100 times more data compared to the first case. In fact the estimated proportions in the first case are based on just 10 sites.</p>
+<p>In such a scenario, one would want to shrink the estimated proportions to <span class="math inline">\((0.25, 0.25, 0.25, 0.25)\)</span> more strongly in the first case than in the second, since the <strong>force of the data is strong in the second case and not so much in the first</strong>.</p>
+<p>But the big question is : what should be the amount of shrinkage in the two cases? Can we provide an adaptive approach that will automatically learn the amount of shrinkage in the two cases, that also scales based on the amount of data available?</p>
+<p>The answer to this question lies in our new approach called <strong>dash</strong>.</p>
+</div>
+<div id="dirichlet-adaptive-shrinkage-dash" class="section level2">
+<h2>Dirichlet adaptive shrinkage (dash)</h2>
+<p>We define <strong>dash</strong> for generic compositional data, not restricted to TFBS or protein sequence data. Let us assume that there are <span class="math inline">\(L\)</span> constituents in the compositional mix. <span class="math inline">\(L\)</span> equals <span class="math inline">\(4\)</span> (corresponding to A,C, G and T bases) for the transcription factor data and <span class="math inline">\(20\)</span> corresponding to the amino acids for the protein sequence data.</p>
+<p>Say we have observed the counts of the constituents for the <span class="math inline">\(L\)</span> categories for <span class="math inline">\(n\)</span> compositional samples. Here <span class="math inline">\(n\)</span> represents the number of binding site positions for a specific TF or a number of TFs. <span class="math inline">\(n\)</span> therefore corresponds to the number of i.i.d compositional samples available to us.</p>
+<p>We model these compositional counts vectors as follows</p>
+<p><span class="math display">\[ (c_{n1}, c_{n2}, \cdots, c_{nL}) \sim Mult \left ( c_{n+} : p_{n1}, p_{n2}, \cdots, p_{nL} \right )  \]</span></p>
+<p>where <span class="math inline">\(c_{n+}\)</span> is the total frequency of the different constituents of the compositional data observed for the <span class="math inline">\(n\)</span> th base. <span class="math inline">\(p_{nl}\)</span> here represents the compositional probabilities such that</p>
+<p><span class="math display">\[ p_{nl}  &gt;= 0 \hspace {1 cm} \sum_{l=1}^{L} p_{nl} = 1  \]</span></p>
+<p>Now we assume a prior distribution on the vector of compositional probabilities <span class="math inline">\((p_{n1}, p_{n2}, \cdots, p_{nL})\)</span>. A typical choice to maintain conjugacy of the posterior distribution is to assume a Dirichlet distribution prior. However, the choice of the concentrator parameter for the Dirichlet parameter prior can impact the posterior and hence the amount of shrinkage greatly. to bypass this problem, we choose a mixture of known Dirichlet priors, each having mean same as the background mean but with varying amounts of concentration, along with unknown mixture proportions to be estimated from the data.</p>
+<p><span class="math display">\[ \left ( p_{n1}, p_{n2}, \cdots, p_{nL} \right ) : = \sum_{k=1}^{K} \pi_{k} Dir \left (\alpha_{k} \mu_{k1}, \alpha_{k} \mu_{k2}, \cdots, \alpha_{k} \mu_{kL} \right )  \hspace {1 cm} \alpha_{k} &gt; 0 \hspace{1 cm}  \sum_{l=1}^{L} \mu_{kl} = 1 \]</span> We assume a prior of <span class="math inline">\(\pi_{k}\)</span> to be Dirichlet</p>
+<p><span class="math display">\[ f(\pi) : = \prod_{k=1}^{K} {\pi_{k}}^{\lambda_{k}-1} \]</span> Such a prior is similar to the <strong>ash</strong> prior introduced by Stephens (2016) for modeling False discovery rates in normal data, and we call it the <strong>dash</strong> prior.</p>
+<p>In this specification of the <strong>dash</strong> prior, all Dirichlet components have the same mean. However, one can add other mean components, some corresponding to the corners, like <span class="math inline">\((1, 0, \cdots, 0)\)</span>, etc, in which case there will be multiple modes to the prior. But as of now, we focus on the unimodal version of the <strong>dash</strong> prior. All the following calculations will go through as is for the multimodal versions of the <strong>dash</strong> prior as well.</p>
+</div>
+<div id="model-estimation-and-output" class="section level2">
+<h2>Model estimation and output</h2>
+<p>The marginal distribution of the counts is given by</p>
+<p><span class="math display">\[ f (c_{n*} | \mu, \alpha)  = \int f(c_{n*}| p_{n*}) f (p_{n*} | \mu, \alpha) d p_{n*} \]</span> Let</p>
+<p><span class="math display">\[ l_{nk} : = \frac{ c_{n+} ! \Gamma (\delta_{0k})}{ \Gamma (c_{n+} + \delta_{0k})} \prod_{l=1}^{L} \frac{\Gamma (c_{nl} + \alpha_{k}\mu_{kl})}{c_{nl} ! \Gamma (\alpha_{k}\mu_{kl})} \hspace{1 cm} where \hspace{1 cm} \delta_{0k} = \alpha_{k} \sum_{l=1}^{L} \mu_{kl}\]</span></p>
+<p><span class="math display">\[ f(c_{n*} | \mu, \alpha) = \sum_{k=1}^{K} \pi_{k} l_{nk} \]</span> We then use EM algorithm or convex programming to estimate the mixture proportions <span class="math inline">\(\pi_{k}\)</span> which is equiavlent to solving the equation</p>
+<p><span class="math display">\[ \log L (\pi) + \log h (\pi) = \sum_{n} log \left (\sum_{k=1}^{K} \pi_{k} l_{nk} \right) + \sum_{k} (\lambda_{k} - 1) \pi_{k} \]</span> Once we estimate <span class="math inline">\(\pi\)</span> from solving the above equation, we define posterior weight of the sample <span class="math inline">\(n\)</span> int the component mixture <span class="math inline">\(k\)</span> to be</p>
+<p><span class="math display">\[ \omega_{nk} : = \frac{\hat{\pi}_{k} l_{nk}}{\sum_{k} \hat{\pi}_{k} l_{nk}}  \]</span></p>
+<p>The posterior can be computed similarly as</p>
+<p><span class="math display">\[ f(p_{n*} | \hat{\pi}, c_{n*}) : = \sum_{k=1}^{K} \omega_{nk} f_{k} (p_{n*} | c_{n*}) \]</span></p>
+<p>where <span class="math inline">\(f_{k} (p_{n*})\)</span> is the posterior component with prior component equal to <span class="math inline">\(k\)</span> th component of the <strong>dash</strong> prior. the posterior component is equal to</p>
+<p><span class="math display">\[ f_{k} (p_{n*} | c_{n*}) : = Dir \left ( c_{n1} + \alpha_{k}\mu_{k1}, c_{n2} + \alpha_{k}\mu_{k2}, \cdots, c_{nL} + \alpha_{k}\mu_{kL} \right) \]</span> The posterior mean therefore is equal to</p>
+<p><span class="math display">\[  E(p_{n*} | \hat{\pi}, c_{n*}) := \sum_{k=1}^{K} \omega_{nk} \frac{c_{n*} + \alpha_{k}\mu_{k*}}{\sum_{l}^{L} (c_{nl} + \alpha_{k} \mu_{kl})} \]</span></p>
+<p>To get an idea of how concentrated the sample is to the prior mean, we compute <span class="math inline">\(\omega_{n1}\)</span> - the posterior probability that the sample comes from the first component - where the 1st component corresponds to <span class="math inline">\(\alpha = Inf\)</span>.</p>
+<p>We can also find the corner posterior probability of each samples by computing the sum of the posterior probabilities corresponding to the components with concentration parameter less than 1. Also the center posterior probability of each sample can be computed by the sum of the posterior probabilities corresponding to the components with very high concentration parameter (say greater than 50).</p>
+</div>
+<div id="configuration-of-the-model" class="section level2">
+<h2>Configuration of the Model</h2>
+<p>One pertinent issue is how to choose <span class="math inline">\(K\)</span>. In general, <span class="math inline">\(K\)</span> can be chosen as large as possible but adding more components beyond a point is futile and time expensive.</p>
+<p>We choose a default set of <span class="math inline">\(\alpha_{k}\)</span> to be <span class="math inline">\((Inf, 100, 50, 20, 10, 2, 1, 0.1, 0.01)\)</span>. In this case <span class="math inline">\(\alpha_{k}=Inf\)</span> corresponds essentially to point mass at the prior means, and then the subsequent choices of <span class="math inline">\(\alpha_{k}\)</span> have lower degree of concentration. $_{k} = $ corresponds to the most uniform scenario, whereas <span class="math inline">\(\alpha_{k} &lt; 1\)</span> correspond to cases with probabiliy masses at the edges of the simplex but with the mean at the prior mean. These components would help to direct the points close to the corners towards the corners and away from the center, resulting in clearer separation of the points closer to the mean with the ones away from it. We choose the prior amount of shrinkage of <span class="math inline">\(\pi_{k}\)</span>, namely <span class="math inline">\(\lambda_{k}\)</span> to be <span class="math inline">\(\left( 10, 1, 1, 1, \cdots, 1 \right )\)</span>.</p>
+<p>For <span class="math inline">\(\alpha_{k} = Inf\)</span>, we use the Stirling formula (ref) with the assumption that <span class="math inline">\(\alpha_{k} \rightarrow Inf\)</span> to approximate the Gamma functions. For the other components, we use the LaplacesDemon R package to evaluate the Gamma functions in the log scale.</p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
