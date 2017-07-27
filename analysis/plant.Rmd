@@ -1,0 +1,58 @@
+---
+title: "TFBS Motif of plant"
+author: "Dongyue Xie"
+date: 2017-07-21
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+The database plantTFDB provides transcription factors of more than 160 speicies, including main lineages of green plants. What is special is that each species has specific background probability of A,C,G,T. Here, we firstly apply *dash* to the PFM and then plot the logo plot. Notice that only PWMs are provided so we first multiply the PWM with the nsites and the round to the nearest interger of each entry as the PFM. 
+
+Actinidia chinensis:
+
+```{r}
+library(dash)
+library(Logolas)
+nam=readLines('http://planttfdb.cbi.pku.edu.cn/download/motif/Ach_TF_binding_motifs_information.txt')
+bg=c(0.31410 , 0.18590 , 0.18590 , 0.31410 )
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+for(i in 2:10){
+  readfile=readLines(paste('http://planttfdb.cbi.pku.edu.cn/motif/Ach/',substring(nam[i],1,10),'.meme',sep = ''))
+  pwm=matrix(as.numeric(as.character(unlist(strsplit(readfile[13:(length(readfile)-3)],split = '\t')))),nrow = 4,byrow = F)
+  nsites=as.numeric(as.character(unlist(strsplit(readfile[12],split = ' '))[grep('nsites',unlist(strsplit(readfile[12],split = ' ')))+1]))
+  pfm=round(pwm*nsites)
+  pwm=dash(t(pfm),optmethod = 'mixEM')
+  pwm=t(pwm$posmean)
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:ncol(pwm)
+  nlogomaker(pwm,color_profile = color_profile,frame_width = 1,logoheight = 'log_odds',bg=bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5))
+}
+
+```
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
