@@ -33,13 +33,12 @@ library(Logolas)
 
 Detection of cancer mutaiton signatures is important in the study of the causes and mechanism of cancers. Usually we consider 6 possible mutation patterns(C to A/G/T, T to A/C/G). Shiraishi *et al.*(2015) proposed a parsimonious approach to model the mutation signatures, by assuming independence across mutation patterns. Here, we use logo plots to visualize the mutaiton signatures(corresponds to the Figure 4 in Shiraishi *et al.*(2015)). 
 
-#Visualization by Logolas
 
 Depletion cases: 26, C at +1; 15,16,25 G at +1
 
 Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
 
-## Information Content Height
+The logo height below is the "Information Content Height".
 
 
 ```{r,echo=FALSE}
@@ -87,7 +86,7 @@ color_profile <- list("type" = "per_symbol",
 
 ```
 
-## Log-odds Height
+The logo height below is the "Log-odds Height".
 
 ```{r,echo=FALSE}
 for(i in c(1:27)){
@@ -132,9 +131,11 @@ color_profile <- list("type" = "per_symbol",
 }
 ```
 
+
+
+```{r,include=FALSE}
 ## Log Height
 
-```{r,echo=FALSE}
 for(i in c(1:27)){
  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -177,9 +178,52 @@ color_profile <- list("type" = "per_symbol",
 }
 ```
 
+
+An earlier study by Alexandrov *et al*.(2013) provided these 27 original mutation signature. Now we visualize these data by Logolas. In the paper, they mentioned that signatures R1 to R3 failed validation and signatures U1 and U2 could not be validated due to lack of available biological samples.
+
+```{r}
+sig=readLines('ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/signatures.txt')
+sig_data=c()
+for (i in 1:length(sig)){
+  sig_data=rbind(sig_data,unlist(strsplit(sig[i],split = '\t')))
+}
+colnames(sig_data)=sig_data[1,]
+sig_data=sig_data[-1,]
+sig_data=as.data.frame(sig_data)
+
+mutation=list()
+for(i in 4:30){
+  CA=0;CG=0;CT=0;TA=0;TC=0;TG=0
+  AA=c(0,0);CC=c(0,0);GG=c(0,0);TT=c(0,0)
+  for(j in 1:96){
+    prob=as.numeric(as.character(unlist(sig_data[j,][i])))
+    CA=CA+ifelse(sig_data[j,1]=='C>A',prob,0)
+    CG=CG+ifelse(sig_data[j,1]=='C>G',prob,0)
+    CT=CT+ifelse(sig_data[j,1]=='C>T',prob,0)
+    TA=TA+ifelse(sig_data[j,1]=='T>A',prob,0)
+    TC=TC+ifelse(sig_data[j,1]=='T>C',prob,0)
+    TG=TG+ifelse(sig_data[j,1]=='T>G',prob,0)
+    AA=AA+c(ifelse(substring(sig_data[j,2],1,1)=='A',prob,0),ifelse(substring(sig_data[j,2],3,3)=='A',prob,0))
+    CC=CC+c(ifelse(substring(sig_data[j,2],1,1)=='C',prob,0),ifelse(substring(sig_data[j,2],3,3)=='C',prob,0))
+    GG=GG+c(ifelse(substring(sig_data[j,2],1,1)=='G',prob,0),ifelse(substring(sig_data[j,2],3,3)=='G',prob,0))
+    TT=TT+c(ifelse(substring(sig_data[j,2],1,1)=='T',prob,0),ifelse(substring(sig_data[j,2],3,3)=='T',prob,0))
+  }
+  mat=rbind(append(AA,NA,1),append(CC,NA,1),append(GG,NA,1),append(TT,NA,1),c(NA,CA,NA),c(NA,CG,NA),c(NA,CT,NA),c(NA,TA,NA),c(NA,TC,NA),c(NA,TG,NA))
+  colnames(mat)=c(-1,0,1)
+  rownames(mat)=c('A','C','G','T',"C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  mutation[[colnames(sig_data)[i]]]=mat
+}
+
+for (i in 1:27){
+  nlogomaker(mutation[[i]],color_profile = color_profile,logoheight = 'log_odds',frame_width = 1,pop_name = names(mutation[i]))
+}
+```
+
 # Reference
 
 Shiraishi, Y., Tremmel, G., Miyano, S., & Stephens, M. (2015). A simple model-based approach to inferring and visualizing cancer mutation signatures. *PLoS genetics*, *11*(12), e1005657.
+
+Alexandrov LB, Nik-Zainal S, Wedge DC, Campbell PJ, Stratton MR. Deciphering signatures of mutational processes operative in human cancer. *Cell Rep*. 2013 Jan;3(1):246–259. pmid:23318258
 
 ## Session information
 
