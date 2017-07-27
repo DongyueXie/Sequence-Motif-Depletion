@@ -13,9 +13,10 @@ These are results of the analysis.
 2. [An explorative data analysis.](ColSums_of_PFM.html)
 3. [An analysis of depletion.](Depletion.html)
 4. [More examples of dimer.](dimer.html)
-5. [Dirichlet adaptive shrinkage.](dash.html)
+5. [Dirichlet adaptive shrinkage.](dashkk.html)
 6. [Cancer Mutation Signature.](mutation.html)
 7. [Consensus sequence.](consensus_seq.html)
+8. [Plant Motif.](plant.html)
 
 All the results here are reproducible. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 
 
