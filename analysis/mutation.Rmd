@@ -41,7 +41,7 @@ Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
 The logo height below is the "Information Content Height".
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE}
 for(i in c(1:27)){
   mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -88,7 +88,7 @@ color_profile <- list("type" = "per_symbol",
 
 The logo height below is the "Log-odds Height".
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE}
 for(i in c(1:27)){
   mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -179,9 +179,10 @@ color_profile <- list("type" = "per_symbol",
 ```
 
 
+
 An earlier study by Alexandrov *et al*.(2013) provided these 27 original mutation signature. Now we visualize these data by Logolas. In the paper, they mentioned that signatures R1 to R3 failed validation and signatures U1 and U2 could not be validated due to lack of available biological samples.
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 sig=readLines('ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/signatures.txt')
 sig_data=c()
 for (i in 1:length(sig)){
