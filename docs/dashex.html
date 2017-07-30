@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dongyue Xie" />
+
+<meta name="date" content="2017-07-27" />
+
+<title>Dash examples</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Logoplot dash</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Dash examples</h1>
+<h4 class="author"><em>Dongyue Xie</em></h4>
+<h4 class="date"><em>2017-07-27</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-07-30</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> dc2a4e6</p>
+<!-- Add your analysis here -->
+<p>We apply <em>dash</em> to some chosen PFMs from HOCOMOCO database. These PFMs cover the cases from small number of sites to large number of sites. We compare two ways to estimate the base probabilities. The first one is simply the sample proportion and another one is the <em>dash</em>. A detailed introduction of dash can be found <a href="dashkk.html">here</a>. We also compare the logo plots and negative logo plots of the estimated probabilities by the two methods.</p>
+<div id="small-size" class="section level1">
+<h1>Small size</h1>
+<p>The first example is when the number of sequences is small. In this PFM, the number of sequence is only 5.</p>
+<pre class="r"><code>PFM[[10]]</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
+[1,]    1    0    0    0    0    0    2    0    0     0     1     0     0
+[2,]    2    0    3    5    3    0    1    0    0     4     1     4     1
+[3,]    1    5    1    0    0    5    2    5    5     1     2     1     4
+[4,]    1    0    1    0    2    0    0    0    0     0     1     0     0
+     [,14]
+[1,]     1
+[2,]     1
+[3,]     0
+[4,]     3</code></pre>
+<pre class="r"><code>colSums(PFM[[10]])</code></pre>
+<pre><code> [1] 5 5 5 5 5 5 5 5 5 5 5 5 5 5</code></pre>
+<p>The estimated probabilities before applying dash are:</p>
+<pre class="r"><code>pwmb1=t(dash(t(PFM[[10]]),optmethod = &#39;mixEM&#39;)$datamean)
+rownames(pwmb1)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwmb1)=(1:14)
+pwmb1</code></pre>
+<pre><code>    1 2   3 4   5 6   7 8 9  10  11  12  13  14
+A 0.2 0 0.0 0 0.0 0 0.4 0 0 0.0 0.2 0.0 0.0 0.2
+C 0.4 0 0.6 1 0.6 0 0.2 0 0 0.8 0.2 0.8 0.2 0.2
+G 0.2 1 0.2 0 0.0 1 0.4 1 1 0.2 0.4 0.2 0.8 0.0
+T 0.2 0 0.2 0 0.4 0 0.0 0 0 0.0 0.2 0.0 0.0 0.6</code></pre>
+<p>The estimated probabilities after applying dash are:</p>
+<pre class="r"><code>pwma1=round(t(dash(t(PFM[[10]]),optmethod = &#39;mixEM&#39;)$posmean),3)
+rownames(pwma1)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwma1)=(1:14)
+pwma1</code></pre>
+<pre><code>     1     2     3     4     5     6     7     8     9    10   11    12
+A 0.25 0.022 0.238 0.022 0.163 0.022 0.254 0.022 0.022 0.104 0.25 0.104
+C 0.25 0.022 0.267 0.935 0.372 0.022 0.249 0.022 0.022 0.571 0.25 0.571
+G 0.25 0.935 0.248 0.022 0.163 0.935 0.254 0.935 0.935 0.221 0.25 0.221
+T 0.25 0.022 0.248 0.022 0.302 0.022 0.244 0.022 0.022 0.104 0.25 0.104
+     13    14
+A 0.104 0.248
+C 0.221 0.248
+G 0.571 0.238
+T 0.104 0.267</code></pre>
+<p>The logo plots</p>
+<pre class="r"><code>logomaker(pwmb1,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>logomaker(pwma1,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The negative logo plots, with log-odds heights.</p>
+<pre class="r"><code>nlogomaker(pwmb1,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>nlogomaker(pwma1,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Comparing the matrices and plots, it is obvious that dash shrinks the estimates toward the background probability, which is 0.25 for the four bases, especially when all or at least three bases appear at that position, for example (1,2,1,1) or (1,1,0,3). Meanwhile, dash preserves the cases when there’s only one base appearing, for example (0,0,5,0).</p>
+</div>
+<div id="moderate-size" class="section level1">
+<h1>Moderate size</h1>
+<p>The second example is when the number of sequences is moderate. In this example, the number of sequences is 41.</p>
+<pre class="r"><code>PFM[[2]]</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
+[1,]   16    8    6    2    0   13   16   15   14    21    16     9     0
+[2,]   11    8    6    0    0    2    4    6    3     4     2     6     1
+[3,]    5    6    8   36   33    1    1    6    6     6     3     3    36
+[4,]    9   19   21    3    8   25   20   14   18    10    20    23     4
+     [,14] [,15] [,16] [,17] [,18]
+[1,]     0     9     3    18    17
+[2,]     0     4     8     1    11
+[3,]    40    10     8     7     4
+[4,]     1    18    22    15     9</code></pre>
+<pre class="r"><code>colSums(PFM[[2]])</code></pre>
+<pre><code> [1] 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</code></pre>
+<p>The estimated probabilities before applying dash are:</p>
+<pre class="r"><code>pwmb2=t(dash(t(PFM[[2]]),optmethod = &#39;mixEM&#39;)$datamean)
+rownames(pwmb2)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwmb2)=(1:18)
+round(pwmb2,3)</code></pre>
+<pre><code>      1     2     3     4     5     6     7     8     9    10    11    12
+A 0.390 0.195 0.146 0.049 0.000 0.317 0.390 0.366 0.341 0.512 0.390 0.220
+C 0.268 0.195 0.146 0.000 0.000 0.049 0.098 0.146 0.073 0.098 0.049 0.146
+G 0.122 0.146 0.195 0.878 0.805 0.024 0.024 0.146 0.146 0.146 0.073 0.073
+T 0.220 0.463 0.512 0.073 0.195 0.610 0.488 0.341 0.439 0.244 0.488 0.561
+     13    14    15    16    17    18
+A 0.000 0.000 0.220 0.073 0.439 0.415
+C 0.024 0.000 0.098 0.195 0.024 0.268
+G 0.878 0.976 0.244 0.195 0.171 0.098
+T 0.098 0.024 0.439 0.537 0.366 0.220</code></pre>
+<p>The estimated probabilities after applying dash are:</p>
+<pre class="r"><code>pwma2=round(t(dash(t(PFM[[2]]),optmethod = &#39;mixEM&#39;)$posmean),3)
+rownames(pwma2)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwma2)=(1:18)
+pwma2</code></pre>
+<pre><code>      1     2     3     4     5     6     7     8     9    10    11    12
+A 0.306 0.215 0.166 0.057 0.006 0.310 0.373 0.307 0.326 0.469 0.371 0.224
+C 0.257 0.215 0.166 0.011 0.006 0.069 0.117 0.199 0.103 0.123 0.076 0.162
+G 0.199 0.183 0.206 0.852 0.791 0.048 0.053 0.199 0.164 0.164 0.097 0.099
+T 0.238 0.388 0.462 0.081 0.196 0.573 0.458 0.295 0.407 0.245 0.456 0.515
+     13    14    15    16    17    18
+A 0.010 0.004 0.229 0.100 0.413 0.351
+C 0.033 0.004 0.146 0.204 0.056 0.261
+G 0.853 0.963 0.246 0.204 0.182 0.156
+T 0.104 0.028 0.380 0.492 0.350 0.231</code></pre>
+<p>The logo plots</p>
+<pre class="r"><code>logomaker(pwmb2,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>logomaker(pwma2,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The negative logo plots, with log-odds heights.</p>
+<pre class="r"><code>nlogomaker(pwmb2,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>nlogomaker(pwma2,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>From the matrices and the plots, we can notice that the probabilities are still shrunk toward 0.25 but are not as much as them in the first example. As the number of sequences increases, the force of data goes up and hence the estimated probabilities are closer to the sample proportion.</p>
+</div>
+<div id="large-size" class="section level1">
+<h1>Large size</h1>
+<p>When the number of sequence continues to increase, we expect that the estimated probabilities are almost the same as sample proportion, since the data have already contained enough information.</p>
+<pre class="r"><code>PFM[[1]]</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9]
+[1,]   41   11   22    3    1    3    0    0   43
+[2,]   18   12   44    1  150    1    3    0   67
+[3,]   56   35   21  146    1  149    1  154   16
+[4,]   39   96   67    4    2    1  150    0   28</code></pre>
+<pre class="r"><code>colSums(PFM[[1]])</code></pre>
+<pre><code>[1] 154 154 154 154 154 154 154 154 154</code></pre>
+<p>The estimated probabilities before applying dash are:</p>
+<pre class="r"><code>pwmb3=t(dash(t(PFM[[1]]),optmethod = &#39;mixEM&#39;)$datamean)
+rownames(pwmb3)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwmb3)=(1:9)
+round(pwmb3,3)</code></pre>
+<pre><code>      1     2     3     4     5     6     7 8     9
+A 0.266 0.071 0.143 0.019 0.006 0.019 0.000 0 0.279
+C 0.117 0.078 0.286 0.006 0.974 0.006 0.019 0 0.435
+G 0.364 0.227 0.136 0.948 0.006 0.968 0.006 1 0.104
+T 0.253 0.623 0.435 0.026 0.013 0.006 0.974 0 0.182</code></pre>
+<p>The estimated probabilities after applying dash are:</p>
+<pre class="r"><code>pwma3=round(t(dash(t(PFM[[1]]),optmethod = &#39;mixEM&#39;)$posmean),3)
+rownames(pwma3)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+colnames(pwma3)=(1:9)
+pwma3</code></pre>
+<pre><code>      1     2     3     4     5     6     7     8     9
+A 0.265 0.077 0.150 0.021 0.008 0.021 0.001 0.001 0.277
+C 0.128 0.084 0.283 0.009 0.969 0.008 0.020 0.001 0.423
+G 0.354 0.228 0.144 0.942 0.008 0.963 0.007 0.998 0.113
+T 0.253 0.611 0.423 0.028 0.014 0.008 0.971 0.001 0.186</code></pre>
+<p>The logo plots</p>
+<pre class="r"><code>logomaker(pwmb3,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>logomaker(pwma3,color_profile = color_profile,frame_width = 1,pop_name = &#39;Logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-15-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The negative logo plots, with log-odds heights.</p>
+<pre class="r"><code>nlogomaker(pwmb3,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, before applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>nlogomaker(pwma3,logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1,pop_name = &#39;Neg logo plot, after applying dash&#39;)</code></pre>
+<p><img src="figure/dashex.Rmd/unnamed-chunk-16-2.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.0 (2017-04-21)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 15063)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252 
+[2] LC_CTYPE=English_United States.1252   
+[3] LC_MONETARY=English_United States.1252
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] dash_0.99.0      SQUAREM_2016.8-2 Logolas_1.1.2   
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.11         digest_0.6.12        rprojroot_1.2       
+ [4] grid_3.4.0           backports_1.0.5      git2r_0.18.0        
+ [7] magrittr_1.5         evaluate_0.10        stringi_1.1.5       
+[10] LaplacesDemon_16.0.1 rmarkdown_1.6        RColorBrewer_1.1-2  
+[13] tools_3.4.0          stringr_1.2.0        parallel_3.4.0      
+[16] yaml_2.1.14          compiler_3.4.0       htmltools_0.3.5     
+[19] knitr_1.15.1        </code></pre>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
