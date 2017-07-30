@@ -1,0 +1,220 @@
+---
+title: "Dash examples"
+author: "Dongyue Xie"
+date: 2017-07-27
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+We apply *dash* to some chosen PFMs from HOCOMOCO database. These PFMs cover the cases from small number of sites to large number of sites. We compare two ways to estimate the base probabilities. The first one is simply the sample proportion and another one is the *dash*. A detailed introduction of dash can be found [here](dashkk.html). We also compare the logo plots and negative logo plots of the estimated probabilities by the two methods. 
+
+```{r,echo=FALSE,include=FALSE,message=FALSE}
+library(Logolas)
+library(dash)
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+
+#function to read txt files:
+#functions to read the data from ENCODE, http://compbio.mit.edu/encode-motifs/motifs.txt
+#Modified from atSNP package
+myStrSplit <- function(x, split) {
+  ret <- list(seq_along(x))
+  for(i in seq_along(x)) {
+    ret[[i]] <- x[i]
+    for(sp in split) {
+      ret[[i]] <- unlist(strsplit(ret[[i]], sp))
+      ret[[i]] <- ret[[i]][nchar(ret[[i]]) > 0]
+      if(length(ret[[i]]) == 0)
+        break
+    }
+  }
+  return(ret)
+}
+
+
+LoadMotifLibrary <- function(filename, tag = "MOTIF", transpose = FALSE, field = 2, sep = c("\t", " "), skipcols = 0, skiprows = 2, pseudocount = 0) {
+  lines <- readLines(filename)
+  motifLineNums <- grep(tag, lines)
+  if(length(myStrSplit(lines[motifLineNums[1]], sep)[[1]]) >= field) {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  } else {
+    motifnames <-
+      sapply(myStrSplit(lines[motifLineNums], sep), function(x) x[field])
+  }
+  allmats <- as.list(seq_along(motifnames))
+  
+  for(matrixId in seq_along(motifLineNums)) {
+    motifLineNum <- motifLineNums[matrixId] + skiprows
+    if(!transpose) {
+      pwm <- NULL
+      nrows <- 0
+      tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+      tmp <- tmp[nchar(tmp) > 0]
+      while(length(tmp) >= 4 + skipcols) {
+        tmp <- as.numeric(tmp[skipcols + seq(4)])
+        if(sum(is.na(tmp)) == 0) {
+          pwm <- rbind(pwm, tmp)
+        }
+        nrows <- nrows + 1
+        tmp <- myStrSplit(lines[nrows + motifLineNum], split = sep)[[1]]
+        tmp <- tmp[nchar(tmp) > 0]
+      }
+    } else {
+      nrows <- 4
+      if(skipcols == 0) {
+        pwm <-
+          matrix(as.numeric(unlist(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep))), ncol = 4)
+      } else {
+        pwm <-
+          matrix(as.numeric(unlist(sapply(myStrSplit(lines[seq(nrows) + motifLineNum - 1], split = sep), function(x) x[-seq(skipcols)]))), ncol = 4)
+      }
+    }
+    
+    pwm = t(pwm)
+    allmats[[matrixId]] <- pwm
+  }
+  names(allmats) <- motifnames
+  return(allmats)
+}
+
+PFM=LoadMotifLibrary('http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_jaspar_format.txt',tag='>',field = 1,sep = c("\t", " ", ">"), transpose = T,skipcols = 0, skiprows = 1)
+```
+
+# Small size
+
+The first example is when the number of sequences is small. In this PFM, the number of sequence is only 5. 
+```{r}
+PFM[[10]]
+colSums(PFM[[10]])
+```
+
+The estimated probabilities before applying dash are:
+```{r}
+pwmb1=t(dash(t(PFM[[10]]),optmethod = 'mixEM')$datamean)
+rownames(pwmb1)=c('A','C','G','T')
+colnames(pwmb1)=(1:14)
+pwmb1
+```
+The estimated probabilities after applying dash are:
+```{r}
+pwma1=round(t(dash(t(PFM[[10]]),optmethod = 'mixEM')$posmean),3)
+rownames(pwma1)=c('A','C','G','T')
+colnames(pwma1)=(1:14)
+pwma1
+```
+
+The logo plots
+```{r,message=FALSE}
+logomaker(pwmb1,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, before applying dash')
+logomaker(pwma1,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, after applying dash')
+```
+
+The negative logo plots, with log-odds heights.
+```{r,message=FALSE}
+nlogomaker(pwmb1,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, before applying dash')
+nlogomaker(pwma1,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, after applying dash')
+```
+
+Comparing the matrices and plots, it is obvious that dash shrinks the estimates toward the background probability, which is 0.25 for the four bases, especially when all or at least three bases appear at that position, for example (1,2,1,1) or (1,1,0,3). Meanwhile, dash preserves the cases when there's only one base appearing, for example (0,0,5,0).
+
+# Moderate size
+
+The second example is when the number of sequences is moderate. In this example, the number of sequences is 41.
+
+```{r}
+PFM[[2]]
+colSums(PFM[[2]])
+```
+
+The estimated probabilities before applying dash are:
+```{r}
+pwmb2=t(dash(t(PFM[[2]]),optmethod = 'mixEM')$datamean)
+rownames(pwmb2)=c('A','C','G','T')
+colnames(pwmb2)=(1:18)
+round(pwmb2,3)
+```
+The estimated probabilities after applying dash are:
+```{r}
+pwma2=round(t(dash(t(PFM[[2]]),optmethod = 'mixEM')$posmean),3)
+rownames(pwma2)=c('A','C','G','T')
+colnames(pwma2)=(1:18)
+pwma2
+```
+
+The logo plots
+```{r,message=FALSE}
+logomaker(pwmb2,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, before applying dash')
+logomaker(pwma2,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, after applying dash')
+```
+
+The negative logo plots, with log-odds heights.
+```{r,message=FALSE}
+nlogomaker(pwmb2,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, before applying dash')
+nlogomaker(pwma2,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, after applying dash')
+```
+
+From the matrices and the plots, we can notice that the probabilities are still shrunk toward 0.25 but are not as much as them in the first example. As the number of sequences increases, the force of data goes up and hence the estimated probabilities are closer to the sample proportion. 
+
+# Large size
+
+When the number of sequence continues to increase, we expect that the estimated probabilities are almost the same as sample proportion, since the data have already contained enough information. 
+
+```{r}
+PFM[[1]]
+colSums(PFM[[1]])
+```
+
+The estimated probabilities before applying dash are:
+```{r}
+pwmb3=t(dash(t(PFM[[1]]),optmethod = 'mixEM')$datamean)
+rownames(pwmb3)=c('A','C','G','T')
+colnames(pwmb3)=(1:9)
+round(pwmb3,3)
+```
+The estimated probabilities after applying dash are:
+```{r}
+pwma3=round(t(dash(t(PFM[[1]]),optmethod = 'mixEM')$posmean),3)
+rownames(pwma3)=c('A','C','G','T')
+colnames(pwma3)=(1:9)
+pwma3
+```
+
+The logo plots
+```{r,message=FALSE}
+logomaker(pwmb3,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, before applying dash')
+logomaker(pwma3,color_profile = color_profile,frame_width = 1,pop_name = 'Logo plot, after applying dash')
+```
+
+The negative logo plots, with log-odds heights.
+```{r,message=FALSE}
+nlogomaker(pwmb3,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, before applying dash')
+nlogomaker(pwma3,logoheight = 'log_odds',color_profile = color_profile,frame_width = 1,pop_name = 'Neg logo plot, after applying dash')
+```
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
