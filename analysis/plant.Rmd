@@ -26,27 +26,102 @@ knitr::read_chunk("chunks.R")
 
 <!-- Add your analysis here -->
 
-The database plantTFDB provides transcription factors of more than 160 speicies, including main lineages of green plants. What is special is that each species has specific background probability of A,C,G,T. Here, we firstly apply *dash* to the PFM and then plot the logo plot. Notice that only PWMs are provided so we first multiply the PWM with the nsites and the round to the nearest interger of each entry as the PFM. 
+The database plantTFDB provides transcription factors of more than 160 species, including main lineages of green plants. What is special is that each species has specific background probability of A,C,G,T. Here, we firstly apply *dash* to the PFM and then plot the logo plot. Notice that only PWMs are provided so we first multiply the PWM with the nsites and the round to the nearest integer of each entry as the PFM. 
+We compare the logo plots of the original PWM, the PWM from dash and the PWM from 'aggregated' dash. In the aggregated dash, we first combine all the PWMs of one species into a large matrix with four rows(of A,C,G,T) and $N_p$ columns where $N_p$ is the sum of the number of positions of each PWM.
 
-Actinidia chinensis:
+We studied the TF binding motifs from 5 species with varying background probabilities, including  
+Vigna radiata
+Eucalyptus grandis
+Arabidopsis thaliana
+Actinidia chinensis.
 
-```{r}
-library(dash)
+
+```{r,message=FALSE,warning=FALSE}
 library(Logolas)
-nam=readLines('http://planttfdb.cbi.pku.edu.cn/download/motif/Ach_TF_binding_motifs_information.txt')
-bg=c(0.31410 , 0.18590 , 0.18590 , 0.31410 )
-color_profile = list("type" = "per_row", 
-                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
-for(i in 2:10){
+# a function to get pwms, pfms, nsites etc from http://planttfdb.cbi.pku.edu.cn/
+#'@ species: the name of speices, use abbreviation. Ach - Actinidia chinensis
+#
+plantTF=function(species){
+  library(dash)
+  #read all the TF names from the infomation page
+  nam=readLines(paste('http://planttfdb.cbi.pku.edu.cn/download/motif/',species,'_TF_binding_motifs_information.txt',sep=''))
+  
+#record the original pwm from the website as a list
+pwm_original=list()
+#record the transformed pfm as a list
+pfm_indi=list()
+#record the pwm after applying the dash
+pwm_dash=list()
+#a large mattrix combine all the pfms
+pfm_cb=c()
+#record the number of positions for each pwm
+npos=c()
+#record the number of sequences of each pfm
+site=c()
+
+for(i in 2:length(nam)){
+  #read each pwm file from the website 
   readfile=readLines(paste('http://planttfdb.cbi.pku.edu.cn/motif/Ach/',substring(nam[i],1,10),'.meme',sep = ''))
+  #extract the pwm
   pwm=matrix(as.numeric(as.character(unlist(strsplit(readfile[13:(length(readfile)-3)],split = '\t')))),nrow = 4,byrow = F)
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:ncol(pwm)
+  pwm_original[[i-1]]=pwm
+  #extract the number of sites
   nsites=as.numeric(as.character(unlist(strsplit(readfile[12],split = ' '))[grep('nsites',unlist(strsplit(readfile[12],split = ' ')))+1]))
+  site[i-1]=nsites
+  #extract the background probabilities
+  bg=as.numeric(strsplit(readfile[8],split = ' ')[[1]][c(2,4,6,8)])
+  #
   pfm=round(pwm*nsites)
-  pwm=dash(t(pfm),optmethod = 'mixEM')
+  pfm_cb=cbind(pfm_cb,pfm)
+  npos[i-1]=ncol(pwm)
+  pfm_indi[[i-1]]=pfm
+  pwm=dash(t(pfm),optmethod = 'mixEM',mode = bg)
   pwm=t(pwm$posmean)
   rownames(pwm)=c('A','C','G','T')
   colnames(pwm)=1:ncol(pwm)
-  nlogomaker(pwm,color_profile = color_profile,frame_width = 1,logoheight = 'log_odds',bg=bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5))
+  pwm_dash[[i-1]]=pwm
+}
+pwm_adash=dash(t(pfm_cb),mode=bg,optmethod = 'mixEM')
+pwm_adash=t(pwm_adash$posmean)
+pwm_agg=list()
+for(i in 1:length(npos)){
+  pwm=pwm_adash[,1:npos[i]]
+  rownames(pwm)=c('A','C','G','T')
+  colnames(pwm)=1:ncol(pwm)
+  pwm_adash=pwm_adash[,-(1:npos[i])]
+  pwm_agg[[i]]=pwm
+}
+
+results=list(pfm=pfm_indi,pwm_original=pwm_original,pwm_dash=pwm_dash,pwm_cbdash=pwm_agg,bg=bg,nseq=site,npos=npos)
+
+return(results)
+
+}
+
+```
+
+Then we show the logo plots and negative logo plots for the three PWMs from 
+Actinidia chinensis. We pick the PWMs whose the number of sequences are small.
+
+```{r,message=FALSE,warning=FALSE}
+
+Ach=plantTF('Ach')
+
+color_profile = list("type" = "per_row", 
+                     "col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+set.seed(1)
+for (i in sample(which(Ach$nseq<=20),5)){
+  
+   logomaker(Ach$pwm_original[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste('original pwm',i))
+  logomaker(Ach$pwm_dash[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste('dash pwm',i))
+  logomaker(Ach$pwm_cbdash[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste('combined dash pwm',i))
+  
+nlogomaker(Ach$pwm_original[[i]],color_profile = color_profile,frame_width = 1,logoheight = 'log_odds',bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste('original pwm',i))
+  nlogomaker(Ach$pwm_dash[[i]],color_profile = color_profile,frame_width = 1,logoheight = 'log_odds',bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste('dash pwm',i))
+  nlogomaker(Ach$pwm_cbdash[[i]],color_profile = color_profile,frame_width = 1,logoheight = 'log_odds',bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste('combined dash pwm',i))
+ 
 }
 
 ```
