@@ -310,32 +310,94 @@ div.tocify {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-07-27</p>
+<p><strong>Last updated:</strong> 2017-08-03</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 16140eb</p>
+<p><strong>Code version:</strong> 14f04a0</p>
 <!-- Add your analysis here -->
-<p>The database plantTFDB provides transcription factors of more than 160 speicies, including main lineages of green plants. What is special is that each species has specific background probability of A,C,G,T. Here, we firstly apply <em>dash</em> to the PFM and then plot the logo plot. Notice that only PWMs are provided so we first multiply the PWM with the nsites and the round to the nearest interger of each entry as the PFM.</p>
-<p>Actinidia chinensis:</p>
-<pre class="r"><code>library(dash)</code></pre>
-<pre><code>Loading required package: SQUAREM</code></pre>
+<p>The database plantTFDB provides transcription factors of more than 160 species, including main lineages of green plants. What is special is that each species has specific background probability of A,C,G,T. Here, we firstly apply <em>dash</em> to the PFM and then plot the logo plot. Notice that only PWMs are provided so we first multiply the PWM with the nsites and the round to the nearest integer of each entry as the PFM. We compare the logo plots of the original PWM, the PWM from dash and the PWM from ‘aggregated’ dash. In the aggregated dash, we first combine all the PWMs of one species into a large matrix with four rows(of A,C,G,T) and <span class="math inline">\(N_p\)</span> columns where <span class="math inline">\(N_p\)</span> is the sum of the number of positions of each PWM.</p>
+<p>We studied the TF binding motifs from 5 species with varying background probabilities, including<br />
+Vigna radiata Eucalyptus grandis Arabidopsis thaliana Actinidia chinensis.</p>
 <pre class="r"><code>library(Logolas)
-nam=readLines(&#39;http://planttfdb.cbi.pku.edu.cn/download/motif/Ach_TF_binding_motifs_information.txt&#39;)
-bg=c(0.31410 , 0.18590 , 0.18590 , 0.31410 )
-color_profile = list(&quot;type&quot; = &quot;per_row&quot;, 
-                     &quot;col&quot; = RColorBrewer::brewer.pal(4,name =&quot;Spectral&quot;))
-for(i in 2:10){
+# a function to get pwms, pfms, nsites etc from http://planttfdb.cbi.pku.edu.cn/
+#&#39;@ species: the name of speices, use abbreviation. Ach - Actinidia chinensis
+#
+plantTF=function(species){
+  library(dash)
+  #read all the TF names from the infomation page
+  nam=readLines(paste(&#39;http://planttfdb.cbi.pku.edu.cn/download/motif/&#39;,species,&#39;_TF_binding_motifs_information.txt&#39;,sep=&#39;&#39;))
+  
+#record the original pwm from the website as a list
+pwm_original=list()
+#record the transformed pfm as a list
+pfm_indi=list()
+#record the pwm after applying the dash
+pwm_dash=list()
+#a large mattrix combine all the pfms
+pfm_cb=c()
+#record the number of positions for each pwm
+npos=c()
+#record the number of sequences of each pfm
+site=c()
+
+for(i in 2:length(nam)){
+  #read each pwm file from the website 
   readfile=readLines(paste(&#39;http://planttfdb.cbi.pku.edu.cn/motif/Ach/&#39;,substring(nam[i],1,10),&#39;.meme&#39;,sep = &#39;&#39;))
+  #extract the pwm
   pwm=matrix(as.numeric(as.character(unlist(strsplit(readfile[13:(length(readfile)-3)],split = &#39;\t&#39;)))),nrow = 4,byrow = F)
+  rownames(pwm)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+  colnames(pwm)=1:ncol(pwm)
+  pwm_original[[i-1]]=pwm
+  #extract the number of sites
   nsites=as.numeric(as.character(unlist(strsplit(readfile[12],split = &#39; &#39;))[grep(&#39;nsites&#39;,unlist(strsplit(readfile[12],split = &#39; &#39;)))+1]))
+  site[i-1]=nsites
+  #extract the background probabilities
+  bg=as.numeric(strsplit(readfile[8],split = &#39; &#39;)[[1]][c(2,4,6,8)])
+  #
   pfm=round(pwm*nsites)
-  pwm=dash(t(pfm),optmethod = &#39;mixEM&#39;)
+  pfm_cb=cbind(pfm_cb,pfm)
+  npos[i-1]=ncol(pwm)
+  pfm_indi[[i-1]]=pfm
+  pwm=dash(t(pfm),optmethod = &#39;mixEM&#39;,mode = bg)
   pwm=t(pwm$posmean)
   rownames(pwm)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
   colnames(pwm)=1:ncol(pwm)
-  nlogomaker(pwm,color_profile = color_profile,frame_width = 1,logoheight = &#39;log_odds&#39;,bg=bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5))
+  pwm_dash[[i-1]]=pwm
+}
+pwm_adash=dash(t(pfm_cb),mode=bg,optmethod = &#39;mixEM&#39;)
+pwm_adash=t(pwm_adash$posmean)
+pwm_agg=list()
+for(i in 1:length(npos)){
+  pwm=pwm_adash[,1:npos[i]]
+  rownames(pwm)=c(&#39;A&#39;,&#39;C&#39;,&#39;G&#39;,&#39;T&#39;)
+  colnames(pwm)=1:ncol(pwm)
+  pwm_adash=pwm_adash[,-(1:npos[i])]
+  pwm_agg[[i]]=pwm
+}
+
+results=list(pfm=pfm_indi,pwm_original=pwm_original,pwm_dash=pwm_dash,pwm_cbdash=pwm_agg,bg=bg,nseq=site,npos=npos)
+
+return(results)
+
 }</code></pre>
-<p><img src="figure/plant.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-1-9.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Then we show the logo plots and negative logo plots for the three PWMs from Actinidia chinensis. We pick the PWMs whose the number of sequences are small.</p>
+<pre class="r"><code>Ach=plantTF(&#39;Ach&#39;)
+
+color_profile = list(&quot;type&quot; = &quot;per_row&quot;, 
+                     &quot;col&quot; = RColorBrewer::brewer.pal(4,name =&quot;Spectral&quot;))
+set.seed(1)
+for (i in sample(which(Ach$nseq&lt;=20),5)){
+  
+   logomaker(Ach$pwm_original[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste(&#39;original pwm&#39;,i))
+  logomaker(Ach$pwm_dash[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste(&#39;dash pwm&#39;,i))
+  logomaker(Ach$pwm_cbdash[[i]],color_profile = color_profile,frame_width = 1,bg=Ach$bg,pop_name = paste(&#39;combined dash pwm&#39;,i))
+  
+nlogomaker(Ach$pwm_original[[i]],color_profile = color_profile,frame_width = 1,logoheight = &#39;log_odds&#39;,bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste(&#39;original pwm&#39;,i))
+  nlogomaker(Ach$pwm_dash[[i]],color_profile = color_profile,frame_width = 1,logoheight = &#39;log_odds&#39;,bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste(&#39;dash pwm&#39;,i))
+  nlogomaker(Ach$pwm_cbdash[[i]],color_profile = color_profile,frame_width = 1,logoheight = &#39;log_odds&#39;,bg=Ach$bg,control = list(logscale = 0.2, quant = 0.5,depletion_weight = 0.5),pop_name = paste(&#39;combined dash pwm&#39;,i))
+ 
+}</code></pre>
+<p><img src="figure/plant.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-22.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-24.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-26.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-27.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/plant.Rmd/unnamed-chunk-2-30.png" width="672" style="display: block; margin: auto;" /></p>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <!-- Insert the session information into the document -->
@@ -357,7 +419,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] Logolas_1.1.2    dash_0.99.0      SQUAREM_2016.8-2
+[1] dash_0.99.0      SQUAREM_2016.8-2 Logolas_1.1.2   
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.11         digest_0.6.12        rprojroot_1.2       
