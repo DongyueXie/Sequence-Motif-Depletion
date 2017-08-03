@@ -22,8 +22,9 @@ These are results of the analysis.
 7. [Cancer Mutation Signature: a new view.](mutation.html)
 8. [Consensus sequence: an informative way.](consensus_seq.html)
 9. [Plant Motif: dealing with background probability.](plant.html)
+10. [PSI-BLAST: PSSM generating](PSSMPsiBlast.html)
 
-All the results here are reproducible. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 
+All the results here are reproducible. See [here](datasource.html) for the list of data sources. The code could be found in the Rmarkdown files under analysis folder and the data are in the data folder in the github repository. 
 
 #Credits
 
