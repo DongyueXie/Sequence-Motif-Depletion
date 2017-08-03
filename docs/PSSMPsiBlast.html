@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Dongyue Xie" />
+
+<meta name="date" content="2017-07-31" />
+
+<title>PSSM from Psi-Blast</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Logoplot dash</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">PSSM from Psi-Blast</h1>
+<h4 class="author"><em>Dongyue Xie</em></h4>
+<h4 class="date"><em>2017-07-31</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-08-03</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 0b14b15</p>
+<!-- Add your analysis here -->
+<p>Position specific score matrix(PSSM), taking into account the position of multiple alignment, can be used to search for other similar sequences.</p>
+<p>One type of PSSM is generated from PSI-BLAST, a searching program for finding members of a protein sequence family. The steps are that firstly performing BLAST using BLOSUM-62 with a single query sequence finds a set of sequences; then use E-value to determine the multiple alignments; thirdly, generate the PSSM, which is scanned against the database to find new sequences.</p>
+<p>Here, I summarized how the PSSM is generated from the multiple alignments. Suppose the multiple alignments are <span class="math inline">\(I\times L\)</span>, where <span class="math inline">\(I\)</span> is the number of sequences and <span class="math inline">\(L\)</span> is the number of positions. Each column is denoted as <span class="math inline">\(l\)</span>, <span class="math inline">\(l=1,2,...,L\)</span>.</p>
+<p>1.Give weight to each residue in the sequence. Gaps(denoted as <span class="math inline">\(-\)</span> in alignments) are regarded as one residue type, and fully conserved residues(all appeared residues are the same at column <span class="math inline">\(l\)</span>) are ignored. Let <span class="math inline">\(m\)</span> denote the number of distinct residues and <span class="math inline">\(n\)</span> denoted the number of sequences with the residue at column <span class="math inline">\(l\)</span>, then the weight is <span class="math inline">\(\frac{1}{mn}\)</span>. For each sequence, the weights for each residue are summed up then devided by the number of sequence. The weight is <span class="math inline">\(W\in R^{I\times 1}\)</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Let <span class="math inline">\(f_l\)</span> denotes the observed column frequencies of residues. In PSI-BLAST, <span class="math inline">\(f_l\)</span> becomes the weights assigned in 1 instead of the raw frequencies. So the weight for residue <span class="math inline">\(a\)</span> at column <span class="math inline">\(l\)</span> is <span class="math inline">\(f_l^a=W^TI(residue=a)\)</span></p></li>
+<li><p>Let <span class="math inline">\(R\)</span> be the set of residues(exclude gaps) appeared at the column <span class="math inline">\(l\)</span>. The formula for the number of pseudecounts for residue <span class="math inline">\(a\)</span> at column <span class="math inline">\(l\)</span> is <span class="math inline">\(c_l^a=\Sigma_{(r\in R,r\neq a)}\frac{f_l^r}{p_r}q_{a,r}\)</span>,where <span class="math inline">\(p_r\)</span> is the background probability and <span class="math inline">\(q_{a,r}=p_ap_re^{\lambda s_{a,r}}\)</span>, <span class="math inline">\(s_{a,r}\)</span> is the score from substitution matrix and <span class="math inline">\(\lambda\)</span> is given by the chosen substitution matrx.</p></li>
+<li><p>Let <span class="math inline">\(q_l^a\)</span> be the probability of residue <span class="math inline">\(a\)</span> occuring at colomn <span class="math inline">\(l\)</span> then <span class="math inline">\(q_l^a=\frac{\alpha f_l^a+\beta c_l^a}{\alpha+\beta}\)</span> where <span class="math inline">\(\alpha\)</span> is <span class="math inline">\(|R|+1\)</span> and <span class="math inline">\(\beta\)</span> is 10 by default.</p></li>
+<li><p>The PSSM is <span class="math inline">\(A\times L\)</span>, where <span class="math inline">\(A=20\)</span>. The score of row <span class="math inline">\(a\)</span> and column <span class="math inline">\(l\)</span> is then <span class="math inline">\(\frac{log(q_{l,a}/p_a)}{\lambda}\)</span> and round it to the nearest integer.</p></li>
+</ol>
+<p>For more detailed description, please refer to the chapter 6 of the book <em>Understanding Bioinformatics</em> <a href="https://books.google.com/books?id=dGayL_tdnBMC&amp;pg=PA165&amp;lpg=PA165&amp;dq=understanding+Bioinformatics+chapter+6&amp;source=bl&amp;ots=RXz3HkCIoo&amp;sig=r7dFY5cpPz5s55Wjw1IT_p0nfiw&amp;hl=zh-TW&amp;sa=X&amp;ved=0ahUKEwiqlNm9w7vVAhVn0oMKHZmMBB0Q6AEINzAC#v=onepage&amp;q=understanding%20Bioinformatics%20chapter%206&amp;f=false">here</a>, and the original paper <a href="https://academic.oup.com/nar/article/doi/10.1093/nar/25.17.3389/1061651/Gapped-BLAST-and-PSI-BLAST-a-new-generation-of">here</a>.</p>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Zvelebil, M., &amp; Baum, J. (2007). Understanding bioinformatics. Garland Science.</p>
+<p>Altschul, S. F., Madden, T. L., SchÃ¤ffer, A. A., Zhang, J., Zhang, Z., Miller, W., &amp; Lipman, D. J. (1997). Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic acids research, 25(17), 3389-3402.</p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.0 (2017-04-21)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 15063)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_United States.1252 
+[2] LC_CTYPE=English_United States.1252   
+[3] LC_MONETARY=English_United States.1252
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] compiler_3.4.0  backports_1.0.5 magrittr_1.5    rprojroot_1.2  
+ [5] tools_3.4.0     htmltools_0.3.5 yaml_2.1.14     Rcpp_0.12.11   
+ [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.15.1    git2r_0.18.0   
+[13] stringr_1.2.0   digest_0.6.12   evaluate_0.10  </code></pre>
+</div>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
