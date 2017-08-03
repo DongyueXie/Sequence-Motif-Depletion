@@ -1,0 +1,58 @@
+---
+title: "PSSM from Psi-Blast"
+author: "Dongyue Xie"
+date: 2017-07-31
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+Position specific score matrix(PSSM), taking into account the position of multiple alignment, can be used to search for other similar sequences.  
+
+One type of PSSM is generated from PSI-BLAST, a searching program for finding members of a protein sequence family. The steps are that firstly performing BLAST using BLOSUM-62 with a single query sequence finds a set of sequences; then use E-value to determine the multiple alignments; thirdly, generate the PSSM, which is scanned against the database to find new sequences.
+
+Here, I summarized how the PSSM is generated from the multiple alignments. Suppose the multiple alignments are $I\times L$, where $I$ is the number of sequences and $L$ is the number of positions. Each column is denoted as $l$, $l=1,2,...,L$. 
+
+1.Give weight to each residue in the sequence. Gaps(denoted as $-$ in alignments) are regarded as one residue type, and fully conserved residues(all appeared residues are the same at column $l$) are ignored. Let $m$ denote the number of distinct residues and $n$ denoted the number of sequences with the residue at column $l$, then the weight is $\frac{1}{mn}$.  For each sequence, the weights for each residue are summed up then devided by the number of sequence. The weight is $W\in R^{I\times 1}$
+
+2. Let $f_l$ denotes the observed column frequencies of residues. In PSI-BLAST, $f_l$ becomes the weights assigned in 1 instead of the raw frequencies. So the weight for residue $a$ at column $l$ is $f_l^a=W^TI(residue=a)$
+
+3. Let $R$ be the set of residues(exclude gaps) appeared at the column $l$. The formula for the number of pseudecounts for residue $a$ at column $l$ is $c_l^a=\Sigma_{(r\in R,r\neq a)}\frac{f_l^r}{p_r}q_{a,r}$,where $p_r$ is the background probability and $q_{a,r}=p_ap_re^{\lambda s_{a,r}}$, $s_{a,r}$ is the score from substitution matrix and $\lambda$ is given by the chosen substitution matrx.
+
+4. Let $q_l^a$ be the probability of residue $a$ occuring at colomn $l$ then $q_l^a=\frac{\alpha f_l^a+\beta c_l^a}{\alpha+\beta}$ where $\alpha$ is $|R|+1$ and $\beta$ is 10 by default.
+
+5. The PSSM is $A\times L$, where $A=20$. The score of row $a$ and column $l$ is then $\frac{log(q_{l,a}/p_a)}{\lambda}$ and round it to the nearest integer.
+
+
+For more detailed description, please refer to the chapter 6 of the book *Understanding Bioinformatics* [here](https://books.google.com/books?id=dGayL_tdnBMC&pg=PA165&lpg=PA165&dq=understanding+Bioinformatics+chapter+6&source=bl&ots=RXz3HkCIoo&sig=r7dFY5cpPz5s55Wjw1IT_p0nfiw&hl=zh-TW&sa=X&ved=0ahUKEwiqlNm9w7vVAhVn0oMKHZmMBB0Q6AEINzAC#v=onepage&q=understanding%20Bioinformatics%20chapter%206&f=false), and the original paper [here](https://academic.oup.com/nar/article/doi/10.1093/nar/25.17.3389/1061651/Gapped-BLAST-and-PSI-BLAST-a-new-generation-of).
+
+#Reference
+
+Zvelebil, M., & Baum, J. (2007). Understanding bioinformatics. Garland Science.
+
+Altschul, S. F., Madden, T. L., Schäffer, A. A., Zhang, J., Zhang, Z., Miller, W., & Lipman, D. J. (1997). Gapped BLAST and PSI-BLAST: a new generation of protein database search programs. Nucleic acids research, 25(17), 3389-3402.
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
