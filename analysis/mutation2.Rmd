@@ -87,7 +87,9 @@ plotsig('Stomach.5.Rdata','Stomach',1)
 
 The Supp Fig 3 in the original paper Shiraishi *et al.*(2015) is attached below.
 
-![Caption for the picture.](SuppF3.png)
+```{r echo=FALSE, out.width='100%'}
+knitr::include_graphics('SuppF3.png')
+```
 
 ## Session information
 
