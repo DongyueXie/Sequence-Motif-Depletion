@@ -1,0 +1,96 @@
+---
+title: "Cancer mutation signature"
+author: "Dongyue Xie"
+date: 2017-08-08
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+<!-- Add your analysis here -->
+
+In Shiraishi *et al.*(2015), the Supp Fig 3 lists several signatures extracted in each cancer type in the Alexandrov *et al.* (2013) data. Here, we compare the signature from Logolas and Shiraishi. 
+
+Cancer mutation data are from [here](https://github.com/friend1ws/pmsignature_paper/tree/master/analysis/AlexandrovEtAl/result/Param_ind5_dir).
+
+
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
+plotsig=function(file,name,i){
+  library(pmsignature)
+library(Logolas)
+cols = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 
+'qual',]
+col_vector = unlist(mapply(RColorBrewer::brewer.pal, cols$maxcolors, rownames(cols)))
+total_chars = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "zero", "one", "two",
+"three", "four", "five", "six", "seven", "eight", "nine", "dot", "comma",
+"dash", "colon", "semicolon", "leftarrow", "rightarrow")
+
+  set.seed(20)
+color_profile <- list("type" = "per_symbol",
+"col" = sample(col_vector, length(total_chars), replace=FALSE))
+
+load(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/mutation/',file,sep = ''))
+
+print(visPMSignature(resultForSave[[1]],i))
+
+mat=resultForSave[[1]]@signatureFeatureDistribution[i,,]
+mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
+  rownames(mat1)=c('A','C','G','T')
+  colnames(mat1) = c("-2", "-1", "0", "1", "2")
+  mat2=cbind(rep(NA,6),rep(NA,6),(mat[1,]),rep(NA,6),rep(NA,6))
+  colnames(mat2) = c("-2", "-1", "0", "1", "2")
+  rownames(mat2) = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  table = rbind(mat1, mat2)
+  
+  logomaker(table,color_profile = color_profile,frame_width = 1,pop_name = paste('logo plot',name))
+  
+nlogomaker(table,
+          logoheight = 'log_odds',
+          color_profile = color_profile,
+          frame_width = 1,
+          xlab = "Position",
+          ylab = "Information content",
+          pop_name = paste('Neg logo plot',name)
+          )
+
+}
+
+plotsig('ALL.2.RData','ALL',1)
+plotsig('Bladder.2.Rdata','Bladder',1)
+plotsig('Breast.2.Rdata','Breast',1)
+plotsig('CLL.2.Rdata','CLL',1)
+plotsig('Cervix.2.Rdata','Cervix',1)
+plotsig('Stomach.5.Rdata','Stomach',1)
+
+
+
+```
+
+The Supp Fig 3 in the original paper Shiraishi *et al.*(2015) is attached below.
+
+![Caption for the picture.](C:/Users/happy/OneDrive/Research/Logoplot/data/mutation/SuppF3.jpg)
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
