@@ -220,6 +220,9 @@ for (i in 1:27){
 }
 ```
 
+Additional mutation signature corresponding to the Supp Fig 3 in Shiraishi *et al.*(2015) can be found [here](mutation2.html)
+
+
 # Reference
 
 Shiraishi, Y., Tremmel, G., Miyano, S., & Stephens, M. (2015). A simple model-based approach to inferring and visualizing cancer mutation signatures. *PLoS genetics*, *11*(12), e1005657.
