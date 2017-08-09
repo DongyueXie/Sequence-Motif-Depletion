@@ -87,7 +87,7 @@ plotsig('Stomach.5.Rdata','Stomach',1)
 
 The Supp Fig 3 in the original paper Shiraishi *et al.*(2015) is attached below.
 
-![Caption for the picture.](C:/Users/happy/OneDrive/Research/Logoplot/data/mutation/SuppF3.jpg)
+![Caption for the picture.](SuppF3.png)
 
 ## Session information
 
