@@ -310,10 +310,10 @@ div.tocify {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-07-27</p>
+<p><strong>Last updated:</strong> 2017-08-09</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> b9eaefd</p>
+<p><strong>Code version:</strong> 3b961c6</p>
 <!-- Add your analysis here -->
 <p>Detection of cancer mutaiton signatures is important in the study of the causes and mechanism of cancers. Usually we consider 6 possible mutation patterns(C to A/G/T, T to A/C/G). Shiraishi <em>et al.</em>(2015) proposed a parsimonious approach to model the mutation signatures, by assuming independence across mutation patterns. Here, we use logo plots to visualize the mutaiton signatures(corresponds to the Figure 4 in Shiraishi <em>et al.</em>(2015)).</p>
 <p>Depletion cases: 26, C at +1; 15,16,25 G at +1</p>
@@ -359,6 +359,7 @@ for (i in 1:27){
   nlogomaker(mutation[[i]],color_profile = color_profile,logoheight = &#39;log_odds&#39;,frame_width = 1,pop_name = names(mutation[i]))
 }</code></pre>
 <p><img src="figure/mutation.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-10.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-22.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-24.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-26.png" width="672" style="display: block; margin: auto;" /><img src="figure/mutation.Rmd/unnamed-chunk-5-27.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Additional mutation signature corresponding to the Supp Fig 3 in Shiraishi <em>et al.</em>(2015) can be found <a href="mutation2.html">here</a></p>
 <div id="reference" class="section level1">
 <h1>Reference</h1>
 <p>Shiraishi, Y., Tremmel, G., Miyano, S., &amp; Stephens, M. (2015). A simple model-based approach to inferring and visualizing cancer mutation signatures. <em>PLoS genetics</em>, <em>11</em>(12), e1005657.</p>
@@ -387,7 +388,7 @@ other attached packages:
 [1] Logolas_1.1.2
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.11       digest_0.6.12      rprojroot_1.2     
+ [1] Rcpp_0.12.12       digest_0.6.12      rprojroot_1.2     
  [4] grid_3.4.0         backports_1.0.5    git2r_0.18.0      
  [7] magrittr_1.5       evaluate_0.10      stringi_1.1.5     
 [10] rmarkdown_1.6      RColorBrewer_1.1-2 tools_3.4.0       
