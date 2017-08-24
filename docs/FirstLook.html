@@ -280,6 +280,9 @@ div.tocify {
   <a href="index.html">Overview</a>
 </li>
 <li>
+  <a href="tutorial.html">Tutorial</a>
+</li>
+<li>
   <a href="license.html">License</a>
 </li>
       </ul>
@@ -313,7 +316,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-08-24</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 900e132</p>
+<p><strong>Code version:</strong> 2264079</p>
 <!-- Add your analysis here -->
 <div id="first-look-at-logolas" class="section level1">
 <h1>First look at Logolas</h1>
@@ -332,7 +335,7 @@ logomaker(p@pwm,color_profile = color_profile, frame_width = 1,ic.scale = TRUE)<
 <pre class="r"><code>seqLogo::seqLogo(p)</code></pre>
 <p><img src="figure/FirstLook.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>User could specify the color for each letter through the <code>color_profile</code>.</p>
-<p>If <code>ic.scale</code>= TRUE, the heights of the bars at each position are determined by the Shannon entropy. The information content for position <span class="math inline">\(i\)</span>, <span class="math inline">\(IC_i\)</span>, is <span class="math inline">\(IC_i=-\Sigma_b q_{b,i}\times \log_2q_{b,i}-(-\Sigma_b p_{b}\times \log_2p_{b})\)</span>, where <span class="math inline">\(q_{b,i}\)</span> is the relative frequency of base <span class="math inline">\(b\)</span> at position <span class="math inline">\(i\)</span> and <span class="math inline">\(p_{b}\)</span> is the background probability of base <span class="math inline">\(b\)</span>. By default, the background probability of the each base is 0.25. So the information content at position <span class="math inline">\(i\)</span> is <span class="math inline">\(IC_i=\Sigma_bq_{b,i}\times \log_2(0.25/q_{b,i})\)</span>.</p>
+<p>If <code>ic.scale</code>= TRUE, the heights of the bars at each position are determined by the Shannon entropy. The information content for position <span class="math inline">\(i\)</span> is <span class="math inline">\(IC_i=-\Sigma_b p_{b}\times \log_2p_{b}-(-\Sigma_b q_{b,i}\times \log_2q_{b,i})\)</span>, where <span class="math inline">\(q_{b,i}\)</span> is the relative frequency of base <span class="math inline">\(b\)</span> at position <span class="math inline">\(i\)</span> and <span class="math inline">\(p_{b}\)</span> is the background probability of base <span class="math inline">\(b\)</span>. By default, the background probability of the each base is 0.25. So the information content at position <span class="math inline">\(i\)</span> is <span class="math inline">\(IC_i=\Sigma_bq_{b,i}\times \log_2(q_{b,i}/0.25)\)</span>.</p>
 <p><code>Logolas</code> could also combine multiple plots into one overall graph. The figure below demonstrates the multiple panel plot as well as some variants of logo plots.</p>
 <pre class="r"><code>library(grid)
 
