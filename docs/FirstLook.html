@@ -316,7 +316,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-08-24</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2264079</p>
+<p><strong>Code version:</strong> 46898f9</p>
 <!-- Add your analysis here -->
 <div id="first-look-at-logolas" class="section level1">
 <h1>First look at Logolas</h1>
@@ -366,6 +366,7 @@ seekViewport(paste0(&quot;plotlogo&quot;, 1))
 logomaker(p@pwm,xlab = &#39;position&#39;,color_profile = color_profile1,
           frame_width = 1,
           newpage = FALSE,
+          pop_name = &#39;Change color&#39;,
           control = list(viewport.margin.left = 5))
 
 #change the y scale:
@@ -374,24 +375,25 @@ seekViewport(paste0(&quot;plotlogo&quot;, 2))
 logomaker(p@pwm,xlab = &#39;position&#39;,color_profile = color_profile,
           frame_width = 1,
           newpage = FALSE,
+          pop_name = &#39;change y scale&#39;,
           yscale_change = FALSE,
           control = list(viewport.margin.left = 5))
 #Normalize the height of bars to 1
-seekViewport(paste0(&quot;plotlogo&quot;, 4))
+seekViewport(paste0(&quot;plotlogo&quot;, 3))
 logomaker(p@pwm,xlab = &#39;position&#39;,color_profile = color_profile,
           frame_width = 1,
           newpage = FALSE,
           ic.scale = FALSE,
+          pop_name = &#39;Normalize the height&#39;,
           control = list(viewport.margin.left = 5))
 #change the background probability
-#And #modify the title and the axis label 
-seekViewport(paste0(&quot;plotlogo&quot;, 3))
+#And modify the title and the axis label 
+seekViewport(paste0(&quot;plotlogo&quot;, 4))
 logomaker(p@pwm,xlab = &#39;position&#39;,color_profile = color_profile,
           frame_width = 1,
           bg=c(0.32, 0.18, 0.2, 0.3),
           newpage = FALSE,
-          ylab = &#39;IC&#39;,
-          pop_name = &#39;Logolas&#39;,
+          pop_name = &#39;Change background prob&#39;,
           control = list(viewport.margin.left = 5))</code></pre>
 <p><img src="figure/FirstLook.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
@@ -497,6 +499,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+           pop_name = &#39;Weight=0.1&#39;,
            control = list(depletion_weight=0.1))
 
 
@@ -506,6 +509,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = &#39;Weight=0.3&#39;,
            control = list(depletion_weight=0.3))
 
 seekViewport(paste0(&quot;plotlogo&quot;, 3))
@@ -514,6 +518,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = &#39;Weight=0.5&#39;,
            control = list(depletion_weight=0.5))
 
 seekViewport(paste0(&quot;plotlogo&quot;, 4))
@@ -522,6 +527,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = &#39;Weight=1&#39;,
            control = list(depletion_weight=1))</code></pre>
 <p><img src="figure/FirstLook.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
