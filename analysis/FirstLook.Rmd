@@ -50,7 +50,7 @@ seqLogo::seqLogo(p)
 
 User could specify the color for each letter through the `color_profile`. 
 
-If `ic.scale`= TRUE, the heights of the bars at each position are determined by the Shannon entropy. The information content for position $i$, $IC_i$, is $IC_i=-\Sigma_b q_{b,i}\times \log_2q_{b,i}-(-\Sigma_b p_{b}\times \log_2p_{b})$, where $q_{b,i}$ is the relative frequency of base $b$ at position $i$ and $p_{b}$ is the background probability of base $b$. By default, the background probability of the each base is 0.25. So the information content at position $i$ is $IC_i=\Sigma_bq_{b,i}\times \log_2(0.25/q_{b,i})$. 
+If `ic.scale`= TRUE, the heights of the bars at each position are determined by the Shannon entropy. The information content for position $i$ is $IC_i=-\Sigma_b p_{b}\times \log_2p_{b}-(-\Sigma_b q_{b,i}\times \log_2q_{b,i})$, where $q_{b,i}$ is the relative frequency of base $b$ at position $i$ and $p_{b}$ is the background probability of base $b$. By default, the background probability of the each base is 0.25. So the information content at position $i$ is $IC_i=\Sigma_bq_{b,i}\times \log_2(q_{b,i}/0.25)$. 
 
 `Logolas` could also combine multiple plots into one overall graph. The figure below demonstrates the multiple panel plot as well as some variants of logo plots. 
 
