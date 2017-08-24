@@ -7,6 +7,8 @@ navbar:
   left:
     - text: "Overview"
       href: index.html
+    - test: "Tutorial"
+      href: tutorial.html
     - text: "License"
       href: license.html
   right:
