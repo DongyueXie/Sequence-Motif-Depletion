@@ -84,6 +84,7 @@ seekViewport(paste0("plotlogo", 1))
 logomaker(p@pwm,xlab = 'position',color_profile = color_profile1,
           frame_width = 1,
           newpage = FALSE,
+          pop_name = 'Change color',
           control = list(viewport.margin.left = 5))
 
 #change the y scale:
@@ -92,24 +93,25 @@ seekViewport(paste0("plotlogo", 2))
 logomaker(p@pwm,xlab = 'position',color_profile = color_profile,
           frame_width = 1,
           newpage = FALSE,
+          pop_name = 'change y scale',
           yscale_change = FALSE,
           control = list(viewport.margin.left = 5))
 #Normalize the height of bars to 1
-seekViewport(paste0("plotlogo", 4))
+seekViewport(paste0("plotlogo", 3))
 logomaker(p@pwm,xlab = 'position',color_profile = color_profile,
           frame_width = 1,
           newpage = FALSE,
           ic.scale = FALSE,
+          pop_name = 'Normalize the height',
           control = list(viewport.margin.left = 5))
 #change the background probability
-#And #modify the title and the axis label 
-seekViewport(paste0("plotlogo", 3))
+#And modify the title and the axis label 
+seekViewport(paste0("plotlogo", 4))
 logomaker(p@pwm,xlab = 'position',color_profile = color_profile,
           frame_width = 1,
           bg=c(0.32, 0.18, 0.2, 0.3),
           newpage = FALSE,
-          ylab = 'IC',
-          pop_name = 'Logolas',
+          pop_name = 'Change background prob',
           control = list(viewport.margin.left = 5))
 
 ```
@@ -228,6 +230,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+           pop_name = 'Weight=0.1',
            control = list(depletion_weight=0.1))
 
 
@@ -237,6 +240,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = 'Weight=0.3',
            control = list(depletion_weight=0.3))
 
 seekViewport(paste0("plotlogo", 3))
@@ -245,6 +249,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = 'Weight=0.5',
            control = list(depletion_weight=0.5))
 
 seekViewport(paste0("plotlogo", 4))
@@ -253,6 +258,7 @@ nlogomaker(p@pwm,
            color_profile = color_profile,
            frame_width = 1,
            newpage = FALSE,
+            pop_name = 'Weight=1',
            control = list(depletion_weight=1))
 
 ```
