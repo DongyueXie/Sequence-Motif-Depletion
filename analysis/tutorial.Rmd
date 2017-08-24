@@ -1,0 +1,11 @@
+---
+title: "Logolas Tutorial"
+output: 
+  html_document: 
+  toc: false
+---
+
+A detailed tutorial of `Logolas` is provided below. 
+
+1. [Introduction](intro.html)
+2. [First Look at Logolas](FirstLook.html)
