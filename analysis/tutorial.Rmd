@@ -2,7 +2,7 @@
 title: "Logolas Tutorial"
 output: 
   html_document: 
-  toc: false
+    toc: false
 ---
 
 A detailed tutorial of `Logolas` is provided below. 
