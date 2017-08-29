@@ -316,7 +316,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-08-29</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> b5c30ea</p>
+<p><strong>Code version:</strong> 8d27e6d</p>
 <!-- Add your analysis here -->
 <p>Logo plot is based on the position weight matrix(PWM), which is transformed from the position frequency matrix(PFM). PFM consists of the counts for each base at each position. This is a typical example of compositional data, which is used to describe the constituents of discrete sample space.</p>
 <p>Suppose for a specific position of a TFBS, the compositional data is <span class="math display">\[ (A, C, G, T) : = (6, 1, 2, 1) \]</span> and one another case is <span class="math display">\[ (A, C, G, T) : = (600, 100, 200, 100). \]</span> And the background probability is assumed to be equal for the four bases. If we transform the counts data into PWM by using the sample proportion, then the estimated proportions for the four bases are the same in both cases. However, in the second case, we have total 1000 samples while only 10 samples in the first case. Hence, we would consider to shrink the estimates to the background probability more strongly in the first case than that in the second case, for the reason that the force of data is stronger in the second scenarios.</p>
@@ -512,14 +512,18 @@ nlogomaker(pfm3dash,
 <table>
 <thead>
 <tr class="header">
-<th>same bg, no dash</th>
-<th>same bg, dash</th>
+<th>1</th>
+<th align="center">2</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td>same bg, no dash</td>
+<td align="center">same bg, dash</td>
+</tr>
+<tr class="even">
 <td>varying bg, no dash</td>
-<td>varying bg, dash</td>
+<td align="center">varying bg, dash</td>
 </tr>
 </tbody>
 </table>
