@@ -239,9 +239,10 @@ The default background probability is uniform for each compositional class. User
 
 Here, we present the comparisons of logo plots and negative logo plots from 4 different PWMs of one PFM generated in the following way:
 
-same bg, no dash     |    same bg, dash    
----------------------|---------------------
-varying bg, no dash  |    varying bg, dash   
+|           1           |            2          |
+| -------------------- |:--------------------:|
+| same bg, no dash     |    same bg, dash     |
+| varying bg, no dash  |     varying bg, dash  | 
 
 Logo plots:
 
