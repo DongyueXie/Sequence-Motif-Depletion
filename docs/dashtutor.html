@@ -316,7 +316,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-08-29</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> c161064</p>
+<p><strong>Code version:</strong> b5c30ea</p>
 <!-- Add your analysis here -->
 <p>Logo plot is based on the position weight matrix(PWM), which is transformed from the position frequency matrix(PFM). PFM consists of the counts for each base at each position. This is a typical example of compositional data, which is used to describe the constituents of discrete sample space.</p>
 <p>Suppose for a specific position of a TFBS, the compositional data is <span class="math display">\[ (A, C, G, T) : = (6, 1, 2, 1) \]</span> and one another case is <span class="math display">\[ (A, C, G, T) : = (600, 100, 200, 100). \]</span> And the background probability is assumed to be equal for the four bases. If we transform the counts data into PWM by using the sample proportion, then the estimated proportions for the four bases are the same in both cases. However, in the second case, we have total 1000 samples while only 10 samples in the first case. Hence, we would consider to shrink the estimates to the background probability more strongly in the first case than that in the second case, for the reason that the force of data is stronger in the second scenarios.</p>
@@ -452,7 +452,7 @@ nlogomaker(pfm1,
           color_profile = color_profile,
           frame_width = 1,
           newpage = F,
-          ylimit = 2.5,
+          ylimit = 2.8,
           pop_name = &#39;low freq&#39;)
 
 seekViewport(paste0(&#39;plotlogo&#39;,2))
@@ -509,8 +509,20 @@ nlogomaker(pfm3dash,
 <p><img src="figure/dashtutor.Rmd/unnamed-chunk-2-1.png" width="1920" style="display: block; margin: auto;" /></p>
 <p>The default background probability is uniform for each compositional class. User could also specify the background probability in the functions including <code>dash</code>,<code>logomaker</code>,<code>nlogomaker</code>.</p>
 <p>Here, we present the comparisons of logo plots and negative logo plots from 4 different PWMs of one PFM generated in the following way:</p>
-<p>same bg, no dash same bg, dash<br />
-———————|——————— varying bg, no dash varying bg, dash</p>
+<table>
+<thead>
+<tr class="header">
+<th>same bg, no dash</th>
+<th>same bg, dash</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>varying bg, no dash</td>
+<td>varying bg, dash</td>
+</tr>
+</tbody>
+</table>
 <p>Logo plots:</p>
 <pre class="r"><code>bg=c(0.3141, 0.1859, 0.1859, 0.3141)
 grid.newpage()
@@ -569,7 +581,7 @@ logomaker(pfm2dashbg,
           newpage = F,
           yscale_change = F,
           pop_name = &#39;varying bg, dash&#39;)</code></pre>
-<p><img src="figure/dashtutor.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/dashtutor.Rmd/unnamed-chunk-3-1.png" width="1920" style="display: block; margin: auto;" /></p>
 <p>Negative logo plots:</p>
 <pre class="r"><code>grid.newpage()
 layout.rows &lt;- 2
@@ -631,7 +643,7 @@ nlogomaker(pfm2dashbg,
           newpage = F,
           ylimit = 2.5,
           pop_name = &#39;varying bg, dash&#39;)</code></pre>
-<p><img src="figure/dashtutor.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/dashtutor.Rmd/unnamed-chunk-4-1.png" width="1920" style="display: block; margin: auto;" /></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
