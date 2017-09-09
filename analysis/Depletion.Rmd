@@ -238,7 +238,7 @@ findalpha=function(sc,top,pwm){
 
 Firstly, we get the depletion list of each database. There are some overlaps of JASPAR 2014 and HOCOMOCO. So here our analysis of depleted TFs focuses on HOCOMOCO database, which consists of Human and Mouse data.
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 #get the list of perfect depeltion from JASPAR, HOCOMOCO
 DepJaspar=depletion(PWMJaspar,findalpha(scJaspar,50,PWMJaspar))
 DepHuman=depletion(PWMHuman,findalpha(scHuman,50,PWMHuman))
@@ -251,11 +251,11 @@ We then analyzed the genes that produce these TFs(with delpetion), by the census
 
 From the analysis of HOCOMOCO plots, we found that two TF families are of interests - SOX and IRF, the reason is that there are several Trancription factor with perfect delpeltion, namely SOX17, SOX3 and IRF3,IRF4,IRF8. Below are the logo plots of Mouse IRF family.
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 for (i in grep('IRF',names(PWMMouse))){
   if(sum(is.na(PWMMouse[[i]]))==0){
     print(GetIUPACSequence(PWMMouse[[i]]))
-  nlogomaker(PWMMouse[[i]],logoheight = 'ic',color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]),ylimit=2.1)
+  nlogomaker(PWMMouse[[i]],logoheight = 'log_odds',color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]),ylimit=2.1)
 }}
 ```
 
@@ -265,7 +265,7 @@ One kind of plots that are of particular interests is the dimer. For example, th
 
 This section presents the delpletion frequency for A,G,C,T at different postions. For each base, in the PWM of a transcription factor, suppose the depletion occurs at the $n_{base}^{th}$ postion and the total number of postion is $n$. Then we measure the relative distance of postion to the center as: $d=|\frac{n_{base}}{n}-0.5|$. If d is close to 0.5, then the depletion position is close to the end. If d is close to 0, then the delpetion position is close to the center.
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
 
 depall=c(DepJaspar,DepHuman,DepMouse)
 l=length(depall)
