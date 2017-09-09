@@ -81,7 +81,11 @@ PWM=LoadMotifLibrary('http://compbio.mit.edu/encode-motifs/motifs.txt',tag = ">"
 
 Protein sequence motif can be found in [3PFDB](http://caps.ncbs.res.in/3pfdb/) database. The database provides the multiple alignment data, PSSM, PWM(weighted observed percentages), etc.
 
+#Mutation Signature
 
+The raw data for plotting the Fig.4 in Shiraishi *et al.*(2015) are in the data folder. The other cancer mutation data are avaiable at the [github](https://github.com/friend1ws/pmsignature) webpage of the paper.
+
+Alexandrov's results (Nature, 2013) can be found [here](ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/signatures.txt) and they are tri-nucleotides.
 
 ## Session information
 
