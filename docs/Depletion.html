@@ -316,7 +316,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2017-09-09</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 993865a</p>
+<p><strong>Code version:</strong> 37571a0</p>
 <!-- Add your analysis here -->
 <p>We have seen some negative logo plots and depletion exmaples in previous vignettr. Now, We are interested in finding the depletion of one particular base(e.g. (0,1/3,1/3,1/3)) and then study whether the corresponding transcription factors have special functionality.</p>
 <p>For convenience, I call this kind of case as “perfect depletion”. Perfect depletion corresponds to <span class="math inline">\(p=(0,\frac{1}{3},\frac{1}{3},\frac{1}{3})\)</span> in position weight matrix(PWM) where 0 is the weight of depleted base. In such case, the information content(IC) is then <span class="math inline">\((0.415,0,0,0)\)</span>, where <span class="math inline">\(0.415\)</span> is the negative IC. With pseudocounts, we would not have the case like <span class="math inline">\(p\)</span>. So now suppose the perfect depletion case is <span class="math inline">\(q=(0.01,0.33,0.33,0.33)\)</span>, then the IC is <span class="math inline">\((0.35,0,0,0)\)</span>. One simple way to find such cases is to measure the difference between the largest IC on nagative part and the second largest IC on each position. The difference is denoted as <span class="math inline">\(d\)</span>. Then if the difference is larger than a threshold <span class="math inline">\(\alpha\)</span>, the perfect depletion exists.</p>
@@ -339,7 +339,7 @@ paste(&#39;There are&#39;,length(DepHuman),&#39;perfect depletion in Human data&
 <pre class="r"><code>for (i in grep(&#39;IRF&#39;,names(PWMMouse))){
   if(sum(is.na(PWMMouse[[i]]))==0){
     print(GetIUPACSequence(PWMMouse[[i]]))
-  nlogomaker(PWMMouse[[i]],logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]),ylimit=2.1)
+  nlogomaker(PWMMouse[[i]],logoheight = &#39;log_odds&#39;,color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]))
 }}</code></pre>
 <pre><code>[1] &quot;RAAASYGAAASY&quot;</code></pre>
 <p><img src="figure/Depletion.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
