@@ -41,7 +41,7 @@ Depletion cases: 26, C at +1; 15,16,25 G at +1
 Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
 
 
-```{r,echo=FALSE,message=FALSE}
+```{r,echo=FALSE,message=FALSE,fig.width=10,fig.height=10}
 #The logo height below is the "Information Content Height".
 for(i in c(1:27)){
  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
@@ -87,7 +87,7 @@ color_profile <- list("type" = "per_symbol",
 
 The logo height below is the "Log-odds Height".
 
-```{r,echo=FALSE,message=FALSE}
+```{r,echo=FALSE,message=FALSE,fig.width=10,fig.height=10}
 for(i in c(1:27)){
   mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -186,7 +186,7 @@ Cancer mutation data are from [here](https://github.com/friend1ws/pmsignature_pa
 
 
 
-```{r,message=FALSE,warning=FALSE,echo=FALSE}
+```{r,message=FALSE,warning=FALSE,echo=FALSE,fig.width=10,fig.height=10}
 plotsig=function(file,name,i,pwm){
   library(pmsignature)
 library(Logolas)
@@ -204,7 +204,7 @@ color_profile <- list("type" = "per_symbol",
 
 load(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/mutation/',file,sep = ''))
 
-print(visPMSignature(resultForSave[[1]],i))
+print(visPMSignature(resultForSave[[1]],i,isScale=T))
 
 mat=resultForSave[[1]]@signatureFeatureDistribution[i,,]
 mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
