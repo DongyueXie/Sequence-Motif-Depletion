@@ -255,7 +255,7 @@ From the analysis of HOCOMOCO plots, we found that two TF families are of intere
 for (i in grep('IRF',names(PWMMouse))){
   if(sum(is.na(PWMMouse[[i]]))==0){
     print(GetIUPACSequence(PWMMouse[[i]]))
-  nlogomaker(PWMMouse[[i]],logoheight = 'log_odds',color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]),ylimit=2.1)
+  nlogomaker(PWMMouse[[i]],logoheight = 'log_odds',color_profile = color_profile,frame_width = 1, pop_name = names(PWMMouse[i]))
 }}
 ```
 
