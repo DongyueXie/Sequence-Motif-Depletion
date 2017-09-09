@@ -29,6 +29,60 @@ knitr::read_chunk("chunks.R")
 Here we list the data sources for the sake of reproducibility. 
 
 
+#TFBS data
+
+##JASPAR
+
+[JASPAR](http://jaspar.genereg.net/) database contains a curated, non-redundant set of profiles, derived from published collections of experimentally defined transcription factor binding sites for eukaryotes.
+
+The database [JASPAR2014](https://bioconductor.riken.jp/packages/3.1/data/experiment/html/JASPAR2014.html) has been packaged into `JASPAR2014`. To search this database, user should use the package `TFBSTools`.
+
+Install packages:
+```{r,eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("JASPAR2014")
+
+source("https://bioconductor.org/biocLite.R")
+biocLite("TFBSTools")
+
+library(TFBSTools)
+library(JASPAR2014)
+```
+
+For the tutorial on how to searching the database, please refer to this [webpage](http://bioconductor.org/packages/release/bioc/vignettes/TFBSTools/inst/doc/TFBSTools.html#database-interfaces-for-jaspar2014-database).
+
+##HOCOMOCO
+
+[HOCOMOCO](http://hocomoco10.autosome.ru/) provides transcription factor (TF) binding models for 600 human and 395 mouse TFs. The data can be found on the [download](http://hocomoco10.autosome.ru/downloads) page.
+
+To read the data from HOCOMOCO, one could use the `LoadMotifLibrary` function from R package `atSNP`.
+```{r,warning=FALSE,eval=FALSE}
+library(devtools)
+install_github("chandlerzuo/atSNP")
+library(atSNP)
+
+PWM=LoadMotifLibrary('http://hocomoco10.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_jaspar_format.txt',tag = '>',transpose = F,field = 1,sep = c("\t", " ", ">"), skipcols = 1, skiprows = 1, pseudocount = 0)
+```
+
+##Manollis Kellis webpage
+
+[Manollis Kellis webpage](http://compbio.mit.edu/encode-motifs/) contains known and discovered motifs for the ENCODE TF ChIP-seq datasets. To read the data [motif.txt](http://compbio.mit.edu/encode-motifs/), one can use the function `LoadMotifLibrary`.
+
+```{r,eval=FALSE}
+PWM=LoadMotifLibrary('http://compbio.mit.edu/encode-motifs/motifs.txt',tag = ">",transpose = F, field = 1, sep = c("\t", " ", ">"), skipcols = 1, skiprows = 1, pseudocount = 0)
+
+```
+
+##PlantTFDB
+
+[PlantTFDB](http://planttfdb.cbi.pku.edu.cn/)is a database that provides transcription factors of more than 160 species, including main lineages of green plants. The data can be found on the [download](http://planttfdb.cbi.pku.edu.cn/download.php) page and under the item "Sets of TF binding motifs for 156 species (157 organisms)".
+
+#Protein Motif
+
+Protein sequence motif can be found in [3PFDB](http://caps.ncbs.res.in/3pfdb/) database. The database provides the multiple alignment data, PSSM, PWM(weighted observed percentages), etc.
+
+
+
 ## Session information
 
 <!-- Insert the session information into the document -->
