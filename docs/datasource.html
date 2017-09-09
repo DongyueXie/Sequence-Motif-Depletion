@@ -280,6 +280,9 @@ div.tocify {
   <a href="index.html">Overview</a>
 </li>
 <li>
+  <a href="tutorial.html">Tutorial</a>
+</li>
+<li>
   <a href="license.html">License</a>
 </li>
       </ul>
@@ -310,12 +313,52 @@ div.tocify {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-08-07</p>
+<p><strong>Last updated:</strong> 2017-09-09</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2f72a5c</p>
+<p><strong>Code version:</strong> e676f7d</p>
 <!-- Add your analysis here -->
 <p>Here we list the data sources for the sake of reproducibility.</p>
+<div id="tfbs-data" class="section level1">
+<h1>TFBS data</h1>
+<div id="jaspar" class="section level2">
+<h2>JASPAR</h2>
+<p><a href="http://jaspar.genereg.net/">JASPAR</a> database contains a curated, non-redundant set of profiles, derived from published collections of experimentally defined transcription factor binding sites for eukaryotes.</p>
+<p>The database <a href="https://bioconductor.riken.jp/packages/3.1/data/experiment/html/JASPAR2014.html">JASPAR2014</a> has been packaged into <code>JASPAR2014</code>. To search this database, user should use the package <code>TFBSTools</code>.</p>
+<p>Install packages:</p>
+<pre class="r"><code>source(&quot;https://bioconductor.org/biocLite.R&quot;)
+biocLite(&quot;JASPAR2014&quot;)
+
+source(&quot;https://bioconductor.org/biocLite.R&quot;)
+biocLite(&quot;TFBSTools&quot;)
+
+library(TFBSTools)
+library(JASPAR2014)</code></pre>
+<p>For the tutorial on how to searching the database, please refer to this <a href="http://bioconductor.org/packages/release/bioc/vignettes/TFBSTools/inst/doc/TFBSTools.html#database-interfaces-for-jaspar2014-database">webpage</a>.</p>
+</div>
+<div id="hocomoco" class="section level2">
+<h2>HOCOMOCO</h2>
+<p><a href="http://hocomoco10.autosome.ru/">HOCOMOCO</a> provides transcription factor (TF) binding models for 600 human and 395 mouse TFs. The data can be found on the <a href="http://hocomoco10.autosome.ru/downloads">download</a> page.</p>
+<p>To read the data from HOCOMOCO, one could use the <code>LoadMotifLibrary</code> function from R package <code>atSNP</code>.</p>
+<pre class="r"><code>library(devtools)
+install_github(&quot;chandlerzuo/atSNP&quot;)
+library(atSNP)
+
+PWM=LoadMotifLibrary(&#39;http://hocomoco10.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_jaspar_format.txt&#39;,tag = &#39;&gt;&#39;,transpose = F,field = 1,sep = c(&quot;\t&quot;, &quot; &quot;, &quot;&gt;&quot;), skipcols = 1, skiprows = 1, pseudocount = 0)</code></pre>
+</div>
+<div id="manollis-kellis-webpage" class="section level2">
+<h2>Manollis Kellis webpage</h2>
+<p><a href="http://compbio.mit.edu/encode-motifs/">Manollis Kellis webpage</a> contains known and discovered motifs for the ENCODE TF ChIP-seq datasets. To read the data <a href="http://compbio.mit.edu/encode-motifs/">motif.txt</a>, one can use the function <code>LoadMotifLibrary</code>.</p>
+<pre class="r"><code>PWM=LoadMotifLibrary(&#39;http://compbio.mit.edu/encode-motifs/motifs.txt&#39;,tag = &quot;&gt;&quot;,transpose = F, field = 1, sep = c(&quot;\t&quot;, &quot; &quot;, &quot;&gt;&quot;), skipcols = 1, skiprows = 1, pseudocount = 0)</code></pre>
+</div>
+<div id="planttfdb" class="section level2">
+<h2>PlantTFDB</h2>
+<p><a href="http://planttfdb.cbi.pku.edu.cn/">PlantTFDB</a>is a database that provides transcription factors of more than 160 species, including main lineages of green plants. The data can be found on the <a href="http://planttfdb.cbi.pku.edu.cn/download.php">download</a> page and under the item “Sets of TF binding motifs for 156 species (157 organisms)”.</p>
+</div>
+</div>
+<div id="protein-motif" class="section level1">
+<h1>Protein Motif</h1>
+<p>Protein sequence motif can be found in <a href="http://caps.ncbs.res.in/3pfdb/">3PFDB</a> database. The database provides the multiple alignment data, PSSM, PWM(weighted observed percentages), etc.</p>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <!-- Insert the session information into the document -->
@@ -338,9 +381,10 @@ attached base packages:
 
 loaded via a namespace (and not attached):
  [1] compiler_3.4.0  backports_1.0.5 magrittr_1.5    rprojroot_1.2  
- [5] tools_3.4.0     htmltools_0.3.5 yaml_2.1.14     Rcpp_0.12.11   
+ [5] tools_3.4.0     htmltools_0.3.5 yaml_2.1.14     Rcpp_0.12.12   
  [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.15.1    git2r_0.18.0   
 [13] stringr_1.2.0   digest_0.6.12   evaluate_0.10  </code></pre>
+</div>
 </div>
 
 <hr>
