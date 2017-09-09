@@ -26,24 +26,25 @@ knitr::read_chunk("chunks.R")
 
 <!-- Add your analysis here -->
 
-```{r,include=FALSE}
+```{r,echo=FALSE}
 library(Logolas)
 ```
 
 
-Detection of cancer mutaiton signatures is important in the study of the causes and mechanism of cancers. Usually we consider 6 possible mutation patterns(C to A/G/T, T to A/C/G). Shiraishi *et al.*(2015) proposed a parsimonious approach to model the mutation signatures, by assuming independence across mutation patterns. Here, we use logo plots to visualize the mutaiton signatures(corresponds to the Figure 4 in Shiraishi *et al.*(2015)). 
+Detection of cancer mutaiton signatures is important in the study of the causes and mechanism of cancers. Usually we consider 6 possible mutation patterns(C to A/G/T, T to A/C/G). Shiraishi *et al.*(2015) proposed a parsimonious approach to model the mutation signatures, by assuming independence across mutation patterns. Here, we use logo plots to visualize the mutaiton signatures from two data sets: Shiraishi *et al.*(2015) and Alexandrov *et al*.(2013).
+
+#Shiraishi *et al.*(2015)
 
 
 Depletion cases: 26, C at +1; 15,16,25 G at +1
 
 Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
 
-The logo height below is the "Information Content Height".
-
 
 ```{r,echo=FALSE,message=FALSE}
+#The logo height below is the "Information Content Height".
 for(i in c(1:27)){
-  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
+ mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
   rownames(mat1)=c('A','C','G','T')
   colnames(mat1) = c("-2", "-1", "0", "1", "2")
@@ -77,12 +78,10 @@ color_profile <- list("type" = "per_symbol",
           frame_width = 1,
           xlab = "Position",
           ylab = "Information content",
-          ylimit = max(colSums(neg_ic_computer(table)$ic_neg))+max(colSums(neg_ic_computer(table)$ic_pos)),
           pop_name = paste('Neg logo plot',i)
           )
   
 }
-
 
 ```
 
@@ -178,11 +177,79 @@ color_profile <- list("type" = "per_symbol",
 }
 ```
 
+#Alexandrov *et al*.(2013).
 
 
-An earlier study by Alexandrov *et al*.(2013) provided these 27 original mutation signature. Now we visualize these data by Logolas. In the paper, they mentioned that signatures R1 to R3 failed validation and signatures U1 and U2 could not be validated due to lack of available biological samples.
+In Shiraishi *et al.*(2015), the Supp Fig 3 lists several signatures extracted in each cancer type in the Alexandrov *et al.* (2013) data. Here, we compare the signature from Logolas and Shiraishi. 
 
-```{r,warning=FALSE,message=FALSE}
+Cancer mutation data are from [here](https://github.com/friend1ws/pmsignature_paper/tree/master/analysis/AlexandrovEtAl/result/Param_ind5_dir).
+
+
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
+plotsig=function(file,name,i,pwm){
+  library(pmsignature)
+library(Logolas)
+cols = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 
+'qual',]
+col_vector = unlist(mapply(RColorBrewer::brewer.pal, cols$maxcolors, rownames(cols)))
+total_chars = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
+"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "zero", "one", "two",
+"three", "four", "five", "six", "seven", "eight", "nine", "dot", "comma",
+"dash", "colon", "semicolon", "leftarrow", "rightarrow")
+
+  set.seed(20)
+color_profile <- list("type" = "per_symbol",
+"col" = sample(col_vector, length(total_chars), replace=FALSE))
+
+load(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/mutation/',file,sep = ''))
+
+print(visPMSignature(resultForSave[[1]],i))
+
+mat=resultForSave[[1]]@signatureFeatureDistribution[i,,]
+mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
+  rownames(mat1)=c('A','C','G','T')
+  colnames(mat1) = c("-2", "-1", "0", "1", "2")
+  mat2=cbind(rep(NA,6),rep(NA,6),(mat[1,]),rep(NA,6),rep(NA,6))
+  colnames(mat2) = c("-2", "-1", "0", "1", "2")
+  rownames(mat2) = c("C>A", "C>G", "C>T", "T>A", "T>C", "T>G")
+  table = rbind(mat1, mat2)
+  
+  logomaker(table,color_profile = color_profile,frame_width = 1,pop_name = paste('logo plot',name))
+  
+nlogomaker(table,
+          logoheight = 'log_odds',
+          color_profile = color_profile,
+          frame_width = 1,
+          xlab = "Position",
+          ylab = "Information content",
+          pop_name = paste('Neg logo plot',name)
+          )
+if(pwm==T){return(table)}
+
+}
+
+plotsig('ALL.2.RData','ALL',1,F)
+plotsig('Bladder.2.Rdata','Bladder',1,F)
+plotsig('Breast.2.Rdata','Breast',1,F)
+plotsig('CLL.2.Rdata','CLL',1,F)
+plotsig('Cervix.2.Rdata','Cervix',1,F)
+plotsig('Stomach.5.Rdata','Stomach',1,F)
+
+
+
+```
+
+The Supp Fig 3 in the original paper Shiraishi *et al.*(2015) is attached below.
+
+```{r echo=FALSE, warning=FALSE,out.width='100%'}
+knitr::include_graphics('SuppF3.png')
+```
+
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+#An earlier study by Alexandrov *et al*.(2013) provided these 27 original mutation signature. Now we visualize these data by Logolas. In the paper, they mentioned that signatures R1 to R3 failed validation and signatures U1 and U2 could not be validated due to lack of available biological samples.
+
 sig=readLines('ftp://ftp.sanger.ac.uk/pub/cancer/AlexandrovEtAl/signatures.txt')
 sig_data=c()
 for (i in 1:length(sig)){
@@ -220,14 +287,14 @@ for (i in 1:27){
 }
 ```
 
-Additional mutation signature corresponding to the Supp Fig 3 in Shiraishi *et al.*(2015) can be found [here](mutation2.html)
+
 
 
 # Reference
 
 Shiraishi, Y., Tremmel, G., Miyano, S., & Stephens, M. (2015). A simple model-based approach to inferring and visualizing cancer mutation signatures. *PLoS genetics*, *11*(12), e1005657.
 
-Alexandrov LB, Nik-Zainal S, Wedge DC, Campbell PJ, Stratton MR. Deciphering signatures of mutational processes operative in human cancer. *Cell Rep*. 2013 Jan;3(1):246–259. pmid:23318258
+Alexandrov LB, Nik-Zainal S, Wedge DC, Campbell PJ, Stratton MR. Deciphering signatures of mutational processes operative in human cancer. *Cell Rep*. 2013 Jan;3(1):246-259. pmid:23318258
 
 ## Session information
 
