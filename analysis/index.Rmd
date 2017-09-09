@@ -6,7 +6,7 @@ output:
     toc: false
 ---
 <br>
-![Depletion](C:/Users/happy/OneDrive/Research/Logoplot/data/depletion2.png) <br>
+![Depletion pic](C:/Users/happy/OneDrive/Research/Logoplot/data/depletion2.png) <br>
 *An example of Depletion*
 
 #Project Overview
