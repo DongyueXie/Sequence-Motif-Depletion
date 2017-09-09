@@ -5,9 +5,9 @@ output:
   html_document:
     toc: false
 ---
-<br>
-![Depletion pic](C:/Users/happy/OneDrive/Research/Logoplot/data/depletion2.png) <br>
-*An example of Depletion*
+
+<img src="C:/Users/happy/OneDrive/Research/Logoplot/data/depletion2.jpg" />
+*An example of depletion*
 
 #Project Overview
 This project aims to study the depletion of nucleotide in DNA sequence and its visualization. Transcription factor binding site is characterized by the DNA sequence motifs. A powerful tool to visualize the motif is the sequence logos. Usually, the enrichment is highlighted while the depletion is usually overlooked. Here, we introduce negative logo plot, where the depletion is plotted down below the zero on y axis so that we can find both strong positive and negative effects.
