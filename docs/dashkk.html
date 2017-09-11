@@ -279,6 +279,9 @@ div.tocify {
   <a href="index.html">Overview</a>
 </li>
 <li>
+  <a href="tutorial.html">Tutorial</a>
+</li>
+<li>
   <a href="license.html">License</a>
 </li>
       </ul>
@@ -339,7 +342,7 @@ div.tocify {
 <p><span class="math display">\[ f (c_{n*} | \mu, \alpha)  = \int f(c_{n*}| p_{n*}) f (p_{n*} | \mu, \alpha) d p_{n*} \]</span> Let</p>
 <p><span class="math display">\[ l_{nk} : = \frac{ c_{n+} ! \Gamma (\delta_{0k})}{ \Gamma (c_{n+} + \delta_{0k})} \prod_{l=1}^{L} \frac{\Gamma (c_{nl} + \alpha_{k}\mu_{kl})}{c_{nl} ! \Gamma (\alpha_{k}\mu_{kl})} \hspace{1 cm} where \hspace{1 cm} \delta_{0k} = \alpha_{k} \sum_{l=1}^{L} \mu_{kl}\]</span></p>
 <p><span class="math display">\[ f(c_{n*} | \mu, \alpha) = \sum_{k=1}^{K} \pi_{k} l_{nk} \]</span> We then use EM algorithm or convex programming to estimate the mixture proportions <span class="math inline">\(\pi_{k}\)</span> which is equiavlent to solving the equation</p>
-<p><span class="math display">\[ \log L (\pi) + \log h (\pi) = \sum_{n} log \left (\sum_{k=1}^{K} \pi_{k} l_{nk} \right) + \sum_{k} (\lambda_{k} - 1) \pi_{k} \]</span> Once we estimate <span class="math inline">\(\pi\)</span> from solving the above equation, we define posterior weight of the sample <span class="math inline">\(n\)</span> int the component mixture <span class="math inline">\(k\)</span> to be</p>
+<p><span class="math display">\[ \log L (\pi) + \log h (\pi) = \sum_{n} \log \left (\sum_{k=1}^{K} \pi_{k} l_{nk} \right) + \sum_{k} (\lambda_{k} - 1) \log(\pi_{k}) \]</span> Once we estimate <span class="math inline">\(\pi\)</span> from solving the above equation, we define posterior weight of the sample <span class="math inline">\(n\)</span> int the component mixture <span class="math inline">\(k\)</span> to be</p>
 <p><span class="math display">\[ \omega_{nk} : = \frac{\hat{\pi}_{k} l_{nk}}{\sum_{k} \hat{\pi}_{k} l_{nk}}  \]</span></p>
 <p>The posterior can be computed similarly as</p>
 <p><span class="math display">\[ f(p_{n*} | \hat{\pi}, c_{n*}) : = \sum_{k=1}^{K} \omega_{nk} f_{k} (p_{n*} | c_{n*}) \]</span></p>
