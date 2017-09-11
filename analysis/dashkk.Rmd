@@ -68,7 +68,7 @@ $$ l_{nk} : = \frac{ c_{n+} ! \Gamma (\delta_{0k})}{ \Gamma (c_{n+} + \delta_{0k
 $$ f(c_{n*} | \mu, \alpha) = \sum_{k=1}^{K} \pi_{k} l_{nk} $$
 We then use EM algorithm or convex programming to estimate the mixture proportions $\pi_{k}$ which is equiavlent to solving the equation 
 
-$$ \log L (\pi) + \log h (\pi) = \sum_{n} log \left (\sum_{k=1}^{K} \pi_{k} l_{nk} \right) + \sum_{k} (\lambda_{k} - 1) \pi_{k} $$
+$$ \log L (\pi) + \log h (\pi) = \sum_{n} \log \left (\sum_{k=1}^{K} \pi_{k} l_{nk} \right) + \sum_{k} (\lambda_{k} - 1) \log(\pi_{k}) $$
 Once we estimate $\pi$ from solving the above equation, we define posterior weight of the sample $n$ int the component mixture $k$ to be 
 
 $$ \omega_{nk} : = \frac{\hat{\pi}_{k} l_{nk}}{\sum_{k} \hat{\pi}_{k} l_{nk}}  $$
