@@ -10,6 +10,7 @@ A tutorial of `Logolas` is provided below.
 1. [Introduction](intro.html)
 2. [First Look at Logolas](FirstLook.html)
 3. [Extended features of Logolas](extend.html)
+4. [Logolas pattern syntax](nomenclature.html)
 4. [Dirichlet adaptive shrinkage](dashtutor.html)
 5. [Applications of Logolas](app.html)
 
