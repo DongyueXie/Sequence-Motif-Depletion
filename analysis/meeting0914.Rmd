@@ -1,0 +1,136 @@
+---
+title: "Meeting0914"
+author: "Dongyue Xie"
+date: "September 13, 2017"
+output: html_document
+---
+
+# Log scale of negative logo plot
+
+Two types of heights. 1: IC based, split the IC based on the log scale norm. 2: Log based, the height of the logo is simply the log scale. 3. Log odds based
+
+A comparison:
+```{r,message=F,fig.width=20,fig.height=20}
+library(Logolas)
+mFile <- system.file("Exfiles/pwm1", package="seqLogo")
+m <- read.table(mFile)
+p <- seqLogo::makePWM(m)
+pwm=p@pwm
+color_profile=list("type" = "per_row","col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+
+library(grid)
+grid.newpage()
+layout.rows <- 2
+layout.cols <- 2
+top.vp <- viewport(layout=grid.layout(layout.rows, layout.cols,
+                                      widths=unit(rep(5,layout.cols), rep("null", 2)),
+                                      heights=unit(rep(5,layout.rows), rep("null", 1))))
+plot_reg <- vpList()
+l <- 1
+for(i in 1:layout.rows){
+  for(j in 1:layout.cols){
+    plot_reg[[l]] <- viewport(layout.pos.col = j, layout.pos.row = i, name = paste0("plotlogo", l))
+    l <- l+1
+  }
+}
+
+
+plot_tree <- vpTree(top.vp, plot_reg)
+
+pushViewport(plot_tree)
+seekViewport(paste0("plotlogo", 1))
+nlogomaker(pwm,logoheight = 'ic',color_profile = color_profile,control = list(ic_scale=1),newpage = F)
+
+seekViewport(paste0("plotlogo", 2))
+nlogomaker(pwm,logoheight = 'log',color_profile = color_profile,
+           pop_name='scale=1',control = list(depletion_weight=0,logscale=1),newpage = F)
+
+seekViewport(paste0("plotlogo", 3))
+nlogomaker(pwm,logoheight = 'log',
+           pop_name='scale=0.1',color_profile = color_profile,control = list(depletion_weight=0,logscale=0.1),newpage = F)
+
+seekViewport(paste0("plotlogo", 4))
+nlogomaker(pwm,logoheight = 'log_odds',color_profile = color_profile,control = list(depletion_weight=0,log_odds_scale=1),newpage = F)
+```
+
+# Cancer mutation signature
+
+[New plot](https://dongyuexie.github.io/Sequence-Motif-Depletion/mutation.html) - improved visualization.
+
+Asked Yuchi - feedback
+
+# Consensus seq
+
+1. [Distance based](https://dongyuexie.github.io/Sequence-Motif-Depletion/consensus_seq.html)
+2. Based on the [logo height](https://dongyuexie.github.io/Sequence-Motif-Depletion/nomenclature.html) of log scale. More intuitive when looking at the logo plot
+
+Subjective
+
+# Protein plot
+
+Negative logo plot does not work well because many residues do not appear at one particular positions. Too many depletions.
+
+PSSM plot, based on the value of PSSM. 
+
+Protein database - [3FDB](http://caps.ncbs.res.in/3pfdb/index.html)
+[Example](http://caps.ncbs.res.in/cgi-bin/mini/databases/3pfdb/get_entry.cgi?id=PF07388)
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
+bg=c(0.074,0.052,0.045,0.054,0.025,0.034,0.054,0.074,0.026,0.068,0.099,0.058,0.025,0.047,0.039,0.057,0.051,0.013,0.034,0.073)
+readprotein=function(file,skip=3,nrows,nsites,bg=bg,adash,mat){
+  library(dash)
+  rawdata=read.table(file = file,skip = skip,nrows = nrows)
+  if(mat=='pwm'){
+    pwm=as.matrix(rawdata[,23:42]/100)
+  pfm=round(pwm*nsites)
+  if(adash==T){
+    pwm=dash(as.matrix(pfm),mode = bg,optmethod = 'mixEM')$posmean
+  }
+  colnames(pwm)=c('A' ,'R','N','D',   'C' ,  'Q',   'E' ,  'G',   'H' ,  'I',   'L' , 'K'  , 'M' ,  'F',   'P' ,  'S'  , 'T' ,  'W',   'Y',   'V')
+  rownames(pwm)=1:nrow(pwm)
+  return(t(pwm))
+  }
+  if(mat=='pssm'){
+    pssm=as.matrix(rawdata[,3:22])
+    colnames(pssm)=c('A' ,'R','N','D',   'C' ,  'Q',   'E' ,  'G',   'H' ,  'I',   'L' , 'K'  , 'M' ,  'F',   'P' ,  'S'  , 'T' ,  'W',   'Y',   'V')
+  rownames(pssm)=1:nrow(pssm)
+  return(t(pssm))
+  }
+}
+pssm= readprotein('http://caps.ncbs.res.in/cgi-bin/mini/databases/3pfdb/3pfdb_pssm_download.cgi?id=PF07966&data_dir=SDB_folder',nrows = 29,nsites = 85,adash = FALSE,mat='pssm')
+pwm= readprotein('http://caps.ncbs.res.in/cgi-bin/mini/databases/3pfdb/3pfdb_pssm_download.cgi?id=PF07966&data_dir=SDB_folder',nrows = 29,nsites = 85,adash = FALSE,mat='pwm')
+pssm=pssm[,19:27]
+colnames(pssm)=1:9
+pwm=pwm[,19:27]
+colnames(pwm)=1:9
+```
+
+```{r,message=FALSE,warning=FALSE}
+cols1 <- c(rev(RColorBrewer::brewer.pal(12, "Paired"))[c(3,4,7,8,11,12,5,6,9,10)],
+RColorBrewer::brewer.pal(12, "Set3")[c(1,2,5,8,9)],
+RColorBrewer::brewer.pal(9, "Set1")[c(9,7)],
+RColorBrewer::brewer.pal(8, "Dark2")[c(3,4,8)])
+color_profile <- list("type" = "per_row",
+"col" = cols1)
+
+nlogomaker(pwm,logoheight = 'ic',
+color_profile = color_profile,
+frame_width = 1)
+
+logo_pssm(pssm,
+          color_profile = color_profile,
+          frame_width = 1
+          )
+
+```
+
+# dash
+
+1. [Intutition, model](https://dongyuexie.github.io/Sequence-Motif-Depletion/dashtutor.html)
+
+2. example: small [sample size](https://dongyuexie.github.io/Sequence-Motif-Depletion/dashtutor.html), 
+[combined dash](https://dongyuexie.github.io/Sequence-Motif-Depletion/app.html)
+
+# vignette and website
+
+[website](https://kkdey.github.io/Logolas-pages/)
