@@ -33,7 +33,7 @@ Based on the logo heights from the negative logo plot, we develop a way to detec
 For the nucleotide, aprat from the standard IUPAC code, we denote the depleted bases by lower cases of the corresponding IUPAC code.
 
 ```{r}
-GetMotif=function(pwm,seqmotif,bg=NULL){
+GetMotif=function(pwm,seqmotif='nucleotide',bg=NULL){
   library(Logolas)
   if(is.null(bg)){bg=rep(1/nrow(pwm),nrow(pwm))}
   ll=get_logo_heights_log(pwm,depletion_weight = 0,scale = 1,bg=bg)
@@ -47,18 +47,16 @@ GetMotif=function(pwm,seqmotif,bg=NULL){
   for(i in 1:ncol(pwm)){
     codes=c()
     #stringent on calling just A,C,G,T
-  #based on (0.6,0.4,0.1,0.1)
-  #if one is larger than 1.3, call it enrichment
+  #based on (0.6,0.13,0.13,0.14)
+  #if one is larger than 1.1, call it enrichment
     if(sum(pp[,i]>=1.1)==1){codes=c(codes,bases[which.max(pwm[,i])])}
     #codes[1,i]=bases[which.max(pwm[,i])]
     #based on (0.4,0.4,0.1,0.1)
     if(sum(pp[,i]>=0.4)==2){codes=c(codes,paste(bases[pp[,i]>=0.4],collapse =''))}
-    #codes[2,i]=paste(bases[pp[,i]>=0.4],collapse ='')
-    #based on (0.8,0.1,0.1,0)
-    if(sum(nn[,i]>=0.45)==1){codes=c(codes,based[nn[,i]>=0.45])}
-    #codes[3,i]=based[nn[,i]>=0.45]
-    #based on (0.3,0.3,0.2,0.2)
-    #else{codes[4,i]='N'}
+    
+    #based on (0.7,0.15,0.15,0)
+    if(sum(nn[,i]>=0.65)==1){codes=c(codes,based[nn[,i]>=0.65])}
+    
     if(is.null(codes)){codes=c(codes,'N')}
     if(length(codes)>1){codes=paste0('[',paste0(codes,collapse = '|'),']',sep='')}
     code[i]=codes
@@ -70,7 +68,8 @@ GetMotif=function(pwm,seqmotif,bg=NULL){
   based=tolower(bases)
   for(i in 1:ncol(pwm)){
     codes=c()
-    if(sum(pp[,i]>=0.4)>0){codes=c(codes,paste(bases[pp[,i]>=0.4],collapse =''))}
+    #based on (0.6,0.4)
+    if(sum(pp[,i]>=1.1)>0){codes=c(codes,paste(bases[pp[,i]>=1.1],collapse =''))}
     if(sum(nn[,i]>=0.45)>0){codes=c(codes,paste(based[nn[,i]>=0.4],collapse =''))}
     if(is.null(codes)){codes=c(codes,'N')}
     if(length(codes)>1){codes=paste0('[',paste0(codes,collapse = '|'),']',sep='')}
@@ -93,12 +92,12 @@ colnames(pwm)=1:ncol(pwm)
 color_profile=list("type" = "per_row","col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
 GetMotif(pwm,'nucleotide')
 logomaker(pwm,color_profile = color_profile,frame_width = 1)
-#nlogomaker(pwm,logoheight = 'log',color_profile = color_profile,frame_width = 1,control = list(depletion_weight=0,logscale=1))
 ```
 
 
-Also, it works well with the protein seqence.
-```{r,message=FALSE,warning=FALSE}
+
+```{r,message=FALSE,warning=FALSE,include=FALSE}
+#Also, it works well with the protein seqence.
 counts_mat <- rbind(c(0, 0, 100, 1, 2), c(4, 3, 30, 35, 2),
 c(100, 0, 10, 2, 7),rep(0,5),
 c(4, 2, 3, 7, 70), c(1, 8, 0, 60, 3),
