@@ -100,7 +100,7 @@ seekViewport(paste0("plotlogo", i))
           frame_width = 1,
           xlab = "Pos",
           ylab = "IC",
-          pop_name = 'i',
+          pop_name = paste(i),
           newpage = F
           )
   
@@ -167,7 +167,7 @@ seekViewport(paste0("plotlogo", i))
           frame_width = 1,
           xlab = "Pos",
           ylab = "IC",
-          pop_name = 'i',
+          pop_name = paste(i),
           newpage = F,
           control = list(depletion_weight=0)
           )
