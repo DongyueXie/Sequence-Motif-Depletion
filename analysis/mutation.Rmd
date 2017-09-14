@@ -41,8 +41,30 @@ Depletion cases: 26, C at +1; 15,16,25 G at +1
 Depletion of subsitituion: 22,23,24, with G,C depleted at flanking sites.
 
 
-```{r,echo=FALSE,message=FALSE,fig.width=3,fig.height=3}
+```{r,echo=FALSE,message=FALSE,fig.width=20,fig.height=50}
 #The logo height below is the "Information Content Height".
+library(grid)
+grid.newpage()
+layout.rows <- 9
+layout.cols <- 3
+top.vp <- viewport(layout=grid.layout(layout.rows, layout.cols,
+                                      widths=unit(rep(5,layout.cols), rep("null", 2)),
+                                      heights=unit(rep(5,layout.rows), rep("null", 1))))
+plot_reg <- vpList()
+l <- 1
+for(i in 1:layout.rows){
+  for(j in 1:layout.cols){
+    plot_reg[[l]] <- viewport(layout.pos.col = j, layout.pos.row = i, name = paste0("plotlogo", l))
+    l <- l+1
+  }
+}
+
+
+plot_tree <- vpTree(top.vp, plot_reg)
+
+pushViewport(plot_tree)
+
+
 for(i in c(1:27)){
  mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -71,14 +93,15 @@ color_profile <- list("type" = "per_symbol",
   #          xlab = "Position",
   #          ylab = "Information content",
   #          pop_name=paste('Logo plot',i))
-
+seekViewport(paste0("plotlogo", i))
   nlogomaker(table,
              logoheight = 'ic',
           color_profile = color_profile,
           frame_width = 1,
-          xlab = "Position",
-          ylab = "Information content",
-          pop_name = paste('Neg logo plot',i)
+          xlab = "Pos",
+          ylab = "IC",
+          pop_name = '',
+          newpage = F
           )
   
 }
@@ -87,7 +110,28 @@ color_profile <- list("type" = "per_symbol",
 
 The logo height below is the "Log-odds Height".
 
-```{r,echo=FALSE,message=FALSE,fig.width=3,fig.height=3}
+```{r,echo=FALSE,message=FALSE,fig.width=20,fig.height=50}
+library(grid)
+grid.newpage()
+layout.rows <- 9
+layout.cols <- 3
+top.vp <- viewport(layout=grid.layout(layout.rows, layout.cols,
+                                      widths=unit(rep(5,layout.cols), rep("null", 2)),
+                                      heights=unit(rep(5,layout.rows), rep("null", 1))))
+plot_reg <- vpList()
+l <- 1
+for(i in 1:layout.rows){
+  for(j in 1:layout.cols){
+    plot_reg[[l]] <- viewport(layout.pos.col = j, layout.pos.row = i, name = paste0("plotlogo", l))
+    l <- l+1
+  }
+}
+
+
+plot_tree <- vpTree(top.vp, plot_reg)
+
+pushViewport(plot_tree)
+
 for(i in c(1:27)){
   mat=read.table(paste('C:/Users/happy/OneDrive/Research/Logoplot/data/Fig4_rawdata/sig_',i,'.txt',sep = ''))
   mat1=cbind(t(mat[2:3,1:4]),rep(NA,4),t(mat[4:5,1:4]))
@@ -116,15 +160,16 @@ color_profile <- list("type" = "per_symbol",
   #          xlab = "Position",
   #          ylab = "Information content",
   #          pop_name=paste('Logo plot',i))
-
+seekViewport(paste0("plotlogo", i))
   nlogomaker(table,
              logoheight = 'log_odds',
           color_profile = color_profile,
           frame_width = 1,
-          xlab = "Position",
-          ylab = "Information content",
-          #ylimit = max(colSums(neg_ic_computer(table)$ic_neg))+max(colSums(neg_ic_computer(table)$ic_pos)),
-          pop_name = paste('Neg logo plot',i)
+          xlab = "Pos",
+          ylab = "IC",
+          pop_name = '',
+          newpage = F,
+          control = list(depletion_weight=0)
           )
   
 }
@@ -186,7 +231,7 @@ Cancer mutation data are from [here](https://github.com/friend1ws/pmsignature_pa
 
 
 
-```{r,message=FALSE,warning=FALSE,echo=FALSE,fig.width=3,fig.height=3}
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
 plotsig=function(file,name,i,pwm){
   library(pmsignature)
 library(Logolas)
