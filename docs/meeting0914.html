@@ -397,6 +397,21 @@ frame_width = 1)</code></pre>
 <li><p>example: small <a href="https://dongyuexie.github.io/Sequence-Motif-Depletion/dashtutor.html">sample size</a>, <a href="https://dongyuexie.github.io/Sequence-Motif-Depletion/app.html">combined dash</a></p></li>
 </ol>
 </div>
+<div id="umi" class="section level1">
+<h1>UMI</h1>
+<p>UMI- unique molecular identifier is a barcode appended to the beginning of a read to use as a marker to make sure there is no double counting. The data is from Tung et al 2016. The first 6 bases correspond to the UMIs, followed by a standard GGG code and then the bases.</p>
+<p>The UMI part of the code seems to show a purine enrichment.</p>
+<pre class="r"><code>color_profile=list(&quot;type&quot; = &quot;per_row&quot;,&quot;col&quot; = RColorBrewer::brewer.pal(4,name =&quot;Spectral&quot;))
+load(&#39;C:/Users/happy/OneDrive/Research/Logoplot/data/count_table_19101.3.B12.AGCCACTT.L004.R1.C6WYKACXX.rda&#39;)
+logomaker(mat,color_profile = color_profile)</code></pre>
+<p><img src="meeting0914_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>nlogomaker(mat,
+           logoheight = &#39;ic&#39;,
+           color_profile = color_profile,
+           frame_width = 1,
+           xlab = &#39;UMI base position&#39;)</code></pre>
+<p><img src="meeting0914_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+</div>
 <div id="vignette-and-website" class="section level1">
 <h1>vignette and website</h1>
 <p><a href="https://kkdey.github.io/Logolas-pages/">website</a></p>
