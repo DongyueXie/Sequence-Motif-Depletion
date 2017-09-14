@@ -131,6 +131,24 @@ logo_pssm(pssm,
 2. example: small [sample size](https://dongyuexie.github.io/Sequence-Motif-Depletion/dashtutor.html), 
 [combined dash](https://dongyuexie.github.io/Sequence-Motif-Depletion/app.html)
 
+#UMI
+
+UMI- unique molecular identifier is a barcode appended to the beginning of a read to use as a marker to make sure there is no double counting. The data is from Tung et al 2016. The first 6 bases correspond to the UMIs, followed by a standard GGG code and then the bases.
+
+The UMI part of the code seems to show a purine enrichment.
+
+```{r,message=FALSE}
+color_profile=list("type" = "per_row","col" = RColorBrewer::brewer.pal(4,name ="Spectral"))
+load('C:/Users/happy/OneDrive/Research/Logoplot/data/count_table_19101.3.B12.AGCCACTT.L004.R1.C6WYKACXX.rda')
+logomaker(mat,color_profile = color_profile)
+nlogomaker(mat,
+           logoheight = 'ic',
+           color_profile = color_profile,
+           frame_width = 1,
+           xlab = 'UMI base position')
+
+```
+
 # vignette and website
 
 [website](https://kkdey.github.io/Logolas-pages/)
